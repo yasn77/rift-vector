@@ -1,0 +1,15 @@
+{
+  "assets": [
+    {
+      "cue_id": "boss_alert",
+      "duration": 0.9599773242630385,
+      "format": "WAV",
+      "kind": "sfx",
+      "path": "boss_alert.wav",
+      "sample_rate": 44100,
+      "subtype": "PCM_16",
+      "target_lufs": -14.0
+    }
+  ],
+  "schema": 1
+}

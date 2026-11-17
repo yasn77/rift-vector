@@ -1,0 +1,15 @@
+{
+  "assets": [
+    {
+      "cue_id": "pickup_power",
+      "duration": 0.3711111111111111,
+      "format": "WAV",
+      "kind": "sfx",
+      "path": "pickup_power.wav",
+      "sample_rate": 44100,
+      "subtype": "PCM_16",
+      "target_lufs": -14.0
+    }
+  ],
+  "schema": 1
+}

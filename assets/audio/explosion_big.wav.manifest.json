@@ -1,0 +1,15 @@
+{
+  "assets": [
+    {
+      "cue_id": "explosion_big",
+      "duration": 1.5987755102040817,
+      "format": "WAV",
+      "kind": "sfx",
+      "path": "explosion_big.wav",
+      "sample_rate": 44100,
+      "subtype": "PCM_16",
+      "target_lufs": -14.0
+    }
+  ],
+  "schema": 1
+}
