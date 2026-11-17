@@ -1,0 +1,32 @@
+[project]
+title = "Rift Vector"
+version = "0.1.0"
+dependencies#0 = https://github.com/britzl/deftest/archive/refs/heads/master.zip
+
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /builtins/render/default.renderc
+
+[input]
+game_binding = /builtins/input/all.input_bindingc
+
+[display]
+width = 960
+height = 540
+
+[physics]
+scale = 0.01
+gravity_y = -1000.0
+velocity_threshold = 100.0
+use_fixed_timestep = 1
+
+[engine]
+fixed_update_frequency = 60
+
+[html5]
+scale_mode = Stretch
+heap_size = 64
+retry_count = 1000
+
+[script]
+shared_state = 1
