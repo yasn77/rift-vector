@@ -1,0 +1,15 @@
+{
+  "assets": [
+    {
+      "cue_id": "bgm_stage_a",
+      "duration": 32.0,
+      "format": "OGG",
+      "kind": "bgm",
+      "path": "bgm_stage_a.ogg",
+      "sample_rate": 44100,
+      "subtype": "VORBIS",
+      "target_lufs": -16.0
+    }
+  ],
+  "schema": 1
+}

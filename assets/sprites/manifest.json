@@ -1,0 +1,1763 @@
+{
+  "schema": 1,
+  "sprites": [
+    {
+      "entry": {
+        "asset_id": "ship",
+        "opaque_bbox": [
+          1,
+          1,
+          30,
+          14
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "ship/ship_fly_00.png",
+          "ship/ship_fly_01.png",
+          "ship/ship_fly_02.png",
+          "ship/ship_fly_03.png"
+        ],
+        "sha256": "99a85abf92e36c0cde5df6c69f2224b5ef487fc28f299462642f79653b2f910e"
+      },
+      "request": {
+        "animations": {
+          "fly": 4
+        },
+        "asset_id": "ship",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#3FA34D",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "RV-7 Lance, right-facing riveted silver wedge fighter with green cockpit, Amiga biomechanical pixel art and hard top-left matte rim light; IN-PLACE pose change through exhaust flicker and intake vane flex, fixed hull anchor.",
+        "tier": "multi_frame_sheet",
+        "width": 32
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "force_lv1",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "force_lv1/force_lv1_pulse_00.png",
+          "force_lv1/force_lv1_pulse_01.png"
+        ],
+        "sha256": "7b665aa8c6c378a664748dec56c207dd6ef84351c82c08d93100cf0c61a649c8"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "force_lv1",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#F2A03D",
+          "#C86A1E"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Small orange caged energy orb with toothed metal arc, top-left rim light; IN-PLACE pose change with radial petal flex and core pulse, fixed centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "force_lv2",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "force_lv2/force_lv2_pulse_00.png",
+          "force_lv2/force_lv2_pulse_01.png"
+        ],
+        "sha256": "751740459a6f70b6beae14287695d84eb2bceaba3521394874f4dbe37df2de68"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "force_lv2",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#F2A03D",
+          "#C86A1E"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Orange energy orb with two hooked cage lobes, top-left rim light; IN-PLACE pose change as lobes curl and core expands, fixed centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "force_lv3",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "force_lv3/force_lv3_pulse_00.png",
+          "force_lv3/force_lv3_pulse_01.png"
+        ],
+        "sha256": "3529614478ada7394bd47019a6e87bd9ccf8cc2a1c1d9aa6aea5419eb7b625fa"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "force_lv3",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#F2A03D",
+          "#C86A1E"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Mature orange Force with four swept cage prongs, top-left rim light; IN-PLACE pose change through prong articulation and bright core pulse, fixed centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "bit",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "bit/bit_orbit_00.png",
+          "bit/bit_orbit_01.png"
+        ],
+        "sha256": "7cce733d03d2710be8d4c4dcfcc202af2a821f1e3c83f780dca4d6a1643a4c9c"
+      },
+      "request": {
+        "animations": {
+          "orbit": 2
+        },
+        "asset_id": "bit",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#C8372D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Riveted silver satellite with red lens and crescent fins, hard top-left light; IN-PLACE pose change through fin tilt and lens shutter, fixed hub.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "player_shot",
+        "opaque_bbox": [
+          1,
+          2,
+          6,
+          5
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "player_shot/player_shot_fly_00.png"
+        ],
+        "sha256": "50dc211c97aa88136916d0b748ca401906a7c74449d445ce00eec804a8eb67fb"
+      },
+      "request": {
+        "animations": {
+          "fly": 1
+        },
+        "asset_id": "player_shot",
+        "fps": 10,
+        "height": 8,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E8D040",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Compact tapered vulcan slug with white-hot tip and amber shaded wake, original pixel projectile, inset transparent border.",
+        "tier": "static_tween",
+        "width": 8
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "wave_beam",
+        "opaque_bbox": [
+          10,
+          2,
+          21,
+          13
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "wave_beam/wave_beam_surge_00.png",
+          "wave_beam/wave_beam_surge_01.png"
+        ],
+        "sha256": "ff224e6f04cb0edc1c793beb670cdbce75a00657af2c8625c486109c60c295fd"
+      },
+      "request": {
+        "animations": {
+          "surge": 2
+        },
+        "asset_id": "wave_beam",
+        "fps": 12,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#6FC3F7",
+          "#3E6EE0"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Blue-white lance envelope with scalloped plasma edges; IN-PLACE pose change through opening and closing plasma lobes, fixed beam spine, luminous core shading.",
+        "tier": "multi_frame_sheet",
+        "width": 32
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "laser_red",
+        "opaque_bbox": [
+          2,
+          2,
+          21,
+          6
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "laser_red/laser_red_surge_00.png",
+          "laser_red/laser_red_surge_01.png"
+        ],
+        "sha256": "51938ef238bbd09614c441ec2b86d581a51d509e8299452b8840d572e7e3ce55"
+      },
+      "request": {
+        "animations": {
+          "surge": 2
+        },
+        "asset_id": "laser_red",
+        "fps": 12,
+        "height": 8,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E04838",
+          "#8E2318"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Twin ruby laser strands with bright directional tips; IN-PLACE pose change in opposed helix curves, fixed centre spine, shaded crimson fringe.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "laser_blue",
+        "opaque_bbox": [
+          2,
+          1,
+          14,
+          6
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "laser_blue/laser_blue_surge_00.png",
+          "laser_blue/laser_blue_surge_01.png"
+        ],
+        "sha256": "8f93a575e95fb2f528d5360d3a2e61991d6c0a543e688dfa6fa6e60a91cb2408"
+      },
+      "request": {
+        "animations": {
+          "surge": 2
+        },
+        "asset_id": "laser_blue",
+        "fps": 12,
+        "height": 8,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#6FC3F7",
+          "#3E6EE0"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Cobalt ricochet lance with icy barbed tip; IN-PLACE pose change as paired plasma fins flare, fixed beam spine, luminous blue shading.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "laser_yellow",
+        "opaque_bbox": [
+          1,
+          1,
+          6,
+          21
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "laser_yellow/laser_yellow_surge_00.png",
+          "laser_yellow/laser_yellow_surge_01.png"
+        ],
+        "sha256": "327b4488b549f4679225350a9c628a800ae1149a1b829e23887484cf82d8c8c5"
+      },
+      "request": {
+        "animations": {
+          "surge": 2
+        },
+        "asset_id": "laser_yellow",
+        "fps": 12,
+        "height": 24,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E8D040",
+          "#F2A03D",
+          "#C86A1E"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Vertical gold flame tongue with hooked curling tip; IN-PLACE pose change through lateral flame curl, fixed base and centre, hot white core and amber shading.",
+        "tier": "multi_frame_sheet",
+        "width": 8
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "missile",
+        "opaque_bbox": [
+          2,
+          1,
+          12,
+          6
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "missile/missile_fly_00.png",
+          "missile/missile_fly_01.png"
+        ],
+        "sha256": "8bd0beb7b3ed137ac595d2f0c18650c771e1d1a2910c78eaa3ad83676c2590c2"
+      },
+      "request": {
+        "animations": {
+          "fly": 2
+        },
+        "asset_id": "missile",
+        "fps": 10,
+        "height": 8,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#C8372D",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Silver dart missile with red nose and orange exhaust, hard top-left rim light; IN-PLACE pose change through exhaust fork and fin flex, fixed chassis.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "enemy_shot",
+        "opaque_bbox": [
+          1,
+          2,
+          6,
+          5
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "enemy_shot/enemy_shot_fly_00.png"
+        ],
+        "sha256": "4640319d43c4ad5a2909d2a519a1f421500a9ce9c6cf9f14aa3142c8cede3f3f"
+      },
+      "request": {
+        "animations": {
+          "fly": 1
+        },
+        "asset_id": "enemy_shot",
+        "fps": 10,
+        "height": 8,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E04838",
+          "#8E2318"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Red chitin splinter projectile with white glint and dark tapered tail, glossy top-left highlight, transparent perimeter.",
+        "tier": "static_tween",
+        "width": 8
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "enemy_orb",
+        "opaque_bbox": [
+          1,
+          1,
+          13,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "enemy_orb/enemy_orb_pulse_00.png",
+          "enemy_orb/enemy_orb_pulse_01.png"
+        ],
+        "sha256": "f611958f7f24121df69d21d0989e110f3a31cc1e5aa3068dba87526bf6d09a75"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "enemy_orb",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E04838",
+          "#8E2318",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Molten red spore with three uneven hooked lobes and glossy top-left core; IN-PLACE pose change through lobe contraction, fixed centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "drone",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          13
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "drone/drone_fly_00.png",
+          "drone/drone_fly_01.png"
+        ],
+        "sha256": "6acadd3c43444a9dd917f32e68764407ba5e46edfb40b42093634cae6b151db5"
+      },
+      "request": {
+        "animations": {
+          "fly": 2
+        },
+        "asset_id": "drone",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#E04838",
+          "#8E2318",
+          "#F2A03D",
+          "#4C525B"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Vorn red-orange chitin scout with split mandibles and dark engine socket, hard top-left glossy light; IN-PLACE pose change through mandible opening, fixed body.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "carrier",
+        "opaque_bbox": [
+          1,
+          1,
+          22,
+          13
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "carrier/carrier_hop_00.png",
+          "carrier/carrier_hop_01.png"
+        ],
+        "sha256": "89e4882b2a0d476badb4ac83203742b10e7d151cc38b0464cc4bc9ff781ba9ad"
+      },
+      "request": {
+        "animations": {
+          "hop": 2
+        },
+        "asset_id": "carrier",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#3FA34D",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Hopping armoured courier with orange crystal belly and green antenna, hard top-left matte metal light; IN-PLACE pose change in folded landing claws, fixed chassis.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "fighter",
+        "opaque_bbox": [
+          2,
+          1,
+          21,
+          14
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "fighter/fighter_fly_00.png",
+          "fighter/fighter_fly_01.png"
+        ],
+        "sha256": "3ff381780b69d3fe47a9d3e81f3bc38e886f23073a7517ae5ddd938779045d71"
+      },
+      "request": {
+        "animations": {
+          "fly": 2
+        },
+        "asset_id": "fighter",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#E04838",
+          "#8E2318",
+          "#F2A03D",
+          "#4C525B"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Swept red chitin interceptor with orange eye and serrated wings, glossy top-left light; IN-PLACE pose change in wing tip flex and jaw flare, fixed thorax.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "worm_segment",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "worm_segment/worm_segment_writhe_00.png",
+          "worm_segment/worm_segment_writhe_01.png"
+        ],
+        "sha256": "645b39d008f4bb7d73ed3518550c0157706481f9d10c4537df9cfe7495c11ab7"
+      },
+      "request": {
+        "animations": {
+          "writhe": 2
+        },
+        "asset_id": "worm_segment",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#D888A0",
+          "#8E4A5E",
+          "#E04838",
+          "#F2F2F2"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Fleshy ring segment with ivory teeth and pink muscle ridges, wet top-left highlights; IN-PLACE pose change through muscle squeeze and tooth curl, fixed segment centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "turret",
+        "opaque_bbox": [
+          1,
+          1,
+          22,
+          22
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "turret/turret_aim_00.png",
+          "turret/turret_aim_01.png"
+        ],
+        "sha256": "b61da1f5d7e1897dba0c189b65289c75c246377c963076bc8d26d4b3ca90febd"
+      },
+      "request": {
+        "animations": {
+          "aim": 2
+        },
+        "asset_id": "turret",
+        "fps": 10,
+        "height": 24,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#C8372D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Riveted silver bunker gun with red sight and ribbed barrel, matte top-left light; IN-PLACE pose change in barrel recoil and breech opening, fixed mount.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "crawler",
+        "opaque_bbox": [
+          2,
+          1,
+          21,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "crawler/crawler_crawl_00.png",
+          "crawler/crawler_crawl_01.png"
+        ],
+        "sha256": "2671e5e75570b9d5a58e6799a34bf4fe15daa3dddacc6cf22e55c33d11c3b214"
+      },
+      "request": {
+        "animations": {
+          "crawl": 2
+        },
+        "asset_id": "crawler",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#E04838",
+          "#8E2318",
+          "#8A9099",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Six-clawed red chitin wall crawler with riveted abdomen, top-left hard glossy light; IN-PLACE pose change through alternating leg folds, fixed abdomen.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "mine",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "mine/mine_arm_00.png",
+          "mine/mine_arm_01.png"
+        ],
+        "sha256": "86855a1bf8593ba4e0b8fe451b63314a81ef6a274767737b86bcd6f7db52da5f"
+      },
+      "request": {
+        "animations": {
+          "arm": 2
+        },
+        "asset_id": "mine",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#8A9099",
+          "#4C525B",
+          "#E04838",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Spiked riveted mine with orange eye between red petal shutters, top-left matte light; IN-PLACE pose change through shutter flare and spike articulation, fixed hub.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "dop",
+        "opaque_bbox": [
+          1,
+          1,
+          22,
+          22
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "dop/dop_guard_00.png",
+          "dop/dop_guard_01.png"
+        ],
+        "sha256": "e0ecfc1c82c31cb123629294bb1ff7a7ee6e7f0a2a17d804a0454f648ea01f1a"
+      },
+      "request": {
+        "animations": {
+          "guard": 2
+        },
+        "asset_id": "dop",
+        "fps": 10,
+        "height": 24,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#E04838",
+          "#8E2318",
+          "#D888A0",
+          "#8A9099",
+          "#F2F2F2"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Vorn clone with broad chitin shield and exposed pale front core, hard top-left glossy light; IN-PLACE pose change in side fins and core iris, fixed body.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "crystal_red",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "crystal_red/crystal_red_pulse_00.png",
+          "crystal_red/crystal_red_pulse_01.png"
+        ],
+        "sha256": "bc07cf29cd9f33164c74e2d50298e31c75ceaaeeaa2ae56fc378df01e3d6e04b"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "crystal_red",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E04838",
+          "#8E2318"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Ruby crystal in clawed silver socket with faceted top-left gleam; IN-PLACE pose change through hinged socket petals, fixed crystal centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "crystal_blue",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "crystal_blue/crystal_blue_pulse_00.png",
+          "crystal_blue/crystal_blue_pulse_01.png"
+        ],
+        "sha256": "c001ec33c65fa5ba5b3f596e149e36e9c7e96b853735d5c50c7df4cd59c281fb"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "crystal_blue",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#6FC3F7",
+          "#3E6EE0"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Sapphire crystal in clawed silver socket with faceted top-left gleam; IN-PLACE pose change through hinged socket petals, fixed crystal centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "crystal_yellow",
+        "opaque_bbox": [
+          3,
+          1,
+          11,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "crystal_yellow/crystal_yellow_pulse_00.png",
+          "crystal_yellow/crystal_yellow_pulse_01.png"
+        ],
+        "sha256": "b56c958f9b6b84841f9df94ec0de4cb8d0df1d41f79094e337f221fe478b9b8c"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "crystal_yellow",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E8D040",
+          "#C86A1E"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Gold crystal in clawed silver socket with faceted top-left gleam; IN-PLACE pose change through hinged socket petals, fixed crystal centre.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "pickup_bit",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "pickup_bit/pickup_bit_pulse_00.png",
+          "pickup_bit/pickup_bit_pulse_01.png"
+        ],
+        "sha256": "9b624b025d52682691879d1fae9a41810a6f29700389e90ae3ef2a45d2e92f56"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "pickup_bit",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#C8372D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Paired silver satellite emblem inside bevelled capsule, top-left metallic gleam; IN-PLACE pose change in opening capsule wings, fixed emblem.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "pickup_speed",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          14
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "pickup_speed/pickup_speed_pulse_00.png",
+          "pickup_speed/pickup_speed_pulse_01.png"
+        ],
+        "sha256": "701605eab221c19ef0411f09f5b8f7f03d1e0721caef7662d3ba656422adb433"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "pickup_speed",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#3FA34D",
+          "#4C525B"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Green double-chevron engine cell inside riveted capsule, top-left metallic gleam; IN-PLACE pose change through vent shutter articulation, fixed emblem.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "pickup_missile",
+        "opaque_bbox": [
+          2,
+          2,
+          13,
+          13
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "pickup_missile/pickup_missile_pulse_00.png",
+          "pickup_missile/pickup_missile_pulse_01.png"
+        ],
+        "sha256": "a83a4f01c7fff542f68f6767c9bf995e8ab4d5200b01571ea6be744e2d77403f"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "pickup_missile",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#C8372D",
+          "#8A9099",
+          "#4C525B"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Twin red-nosed missile emblem in silver capsule, top-left metallic gleam; IN-PLACE pose change through unfolding retaining claws, fixed emblem.",
+        "tier": "multi_frame_sheet",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "explosion_small",
+        "opaque_bbox": [
+          2,
+          2,
+          22,
+          21
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "explosion_small/explosion_small_burst_00.png",
+          "explosion_small/explosion_small_burst_01.png",
+          "explosion_small/explosion_small_burst_02.png",
+          "explosion_small/explosion_small_burst_03.png"
+        ],
+        "sha256": "873740bbfaef0ecdce8dc7a47a686a328e2f31605cb10d538151ebaa924d9481"
+      },
+      "request": {
+        "animations": {
+          "burst": 4
+        },
+        "asset_id": "explosion_small",
+        "fps": 16,
+        "height": 24,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E8D040",
+          "#F2A03D",
+          "#C86A1E",
+          "#8E2318"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Small radial fireball with torn chitin fragments and shaded amber smoke; IN-PLACE pose change from tight ignition to curled lobes to contracting embers, fixed centre, no travelling body.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "explosion_big",
+        "opaque_bbox": [
+          2,
+          2,
+          46,
+          45
+        ],
+        "palette_count": 6,
+        "png_paths": [
+          "explosion_big/explosion_big_burst_00.png",
+          "explosion_big/explosion_big_burst_01.png",
+          "explosion_big/explosion_big_burst_02.png",
+          "explosion_big/explosion_big_burst_03.png"
+        ],
+        "sha256": "4a5bcb36bdea05d915affe2d9fe2f39e8d0e0fbff61755e2a11f1425a1ffe3bd"
+      },
+      "request": {
+        "animations": {
+          "burst": 4
+        },
+        "asset_id": "explosion_big",
+        "fps": 16,
+        "height": 48,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E8D040",
+          "#F2A03D",
+          "#C86A1E",
+          "#8E2318",
+          "#4C525B"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Layered radial reactor blast with white core, orange flame petals and grey debris; IN-PLACE pose change as asymmetric petals unfurl and collapse, fixed blast centre.",
+        "tier": "multi_frame_sheet",
+        "width": 48
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_01_ribmaw",
+        "opaque_bbox": [
+          1,
+          2,
+          78,
+          61
+        ],
+        "palette_count": 6,
+        "png_paths": [
+          "boss_01_ribmaw/boss_01_ribmaw_attack_00.png",
+          "boss_01_ribmaw/boss_01_ribmaw_attack_01.png",
+          "boss_01_ribmaw/boss_01_ribmaw_attack_02.png",
+          "boss_01_ribmaw/boss_01_ribmaw_attack_03.png"
+        ],
+        "sha256": "4315d237beedf1945fd8464a298d8cb67c44191dcd117bd794f03ca5d36474be"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_01_ribmaw",
+        "fps": 8,
+        "height": 64,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#E04838",
+          "#8E2318",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Ribmaw, plated skeletal beast with crescent tail and orange chest reactor, hard top-left matte hull and glossy core; IN-PLACE pose change through tail curl and chest rib opening, fixed torso.",
+        "tier": "multi_frame_sheet",
+        "width": 80
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_02_oculocyst",
+        "opaque_bbox": [
+          2,
+          1,
+          77,
+          78
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "boss_02_oculocyst/boss_02_oculocyst_attack_00.png",
+          "boss_02_oculocyst/boss_02_oculocyst_attack_01.png",
+          "boss_02_oculocyst/boss_02_oculocyst_attack_02.png",
+          "boss_02_oculocyst/boss_02_oculocyst_attack_03.png"
+        ],
+        "sha256": "30365812c0dfd2a6b2b04a24fee8ce4b850d3b6b54f781807f2b29d6f8e72b0d"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_02_oculocyst",
+        "fps": 8,
+        "height": 80,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#D888A0",
+          "#8E4A5E",
+          "#E04838",
+          "#8E2318"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Oculocyst, pink flesh cave organ with toothed eyelid and worm sacs, wet top-left highlights; IN-PLACE pose change through iris opening and sac contraction, fixed organ anchor.",
+        "tier": "multi_frame_sheet",
+        "width": 80
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_03_iron_vesper",
+        "opaque_bbox": [
+          2,
+          2,
+          124,
+          93
+        ],
+        "palette_count": 6,
+        "png_paths": [
+          "boss_03_iron_vesper/boss_03_iron_vesper_attack_00.png",
+          "boss_03_iron_vesper/boss_03_iron_vesper_attack_01.png"
+        ],
+        "sha256": "1ba2814e27028b6dba5c79ca6c052c98727a7fd27a3a9404faeac442a69087b0"
+      },
+      "request": {
+        "animations": {
+          "attack": 2
+        },
+        "asset_id": "boss_03_iron_vesper",
+        "fps": 8,
+        "height": 96,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#3FA34D",
+          "#C8372D",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Iron Vesper battleship hull section, layered riveted decks with rear engine bay and green status lights, hard top-left matte metal; IN-PLACE pose change through engine iris and radiator vane articulation, fixed hull.",
+        "tier": "multi_frame_sheet",
+        "width": 128
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_04_trifold",
+        "opaque_bbox": [
+          2,
+          2,
+          61,
+          62
+        ],
+        "palette_count": 6,
+        "png_paths": [
+          "boss_04_trifold/boss_04_trifold_attack_00.png",
+          "boss_04_trifold/boss_04_trifold_attack_01.png",
+          "boss_04_trifold/boss_04_trifold_attack_02.png",
+          "boss_04_trifold/boss_04_trifold_attack_03.png"
+        ],
+        "sha256": "10522308be19d364e1dcce765fd7790940f65105102cfc42ec05b35c44dcf0da"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_04_trifold",
+        "fps": 8,
+        "height": 64,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#E04838",
+          "#8E2318",
+          "#6FC3F7"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Trifold Compiler, three interlocking chitin-metal lobes around icy reactor, hard top-left light; IN-PLACE pose change as lobe hinges open and close, fixed assembly hub, lobes reusable as orbiting parts.",
+        "tier": "multi_frame_sheet",
+        "width": 64
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_05_bellmite",
+        "opaque_bbox": [
+          13,
+          2,
+          65,
+          77
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "boss_05_bellmite/boss_05_bellmite_attack_00.png",
+          "boss_05_bellmite/boss_05_bellmite_attack_01.png",
+          "boss_05_bellmite/boss_05_bellmite_attack_02.png",
+          "boss_05_bellmite/boss_05_bellmite_attack_03.png"
+        ],
+        "sha256": "283089a356c36f4f44d3fc863cdfe6e8161528d4abdc581c0a72bc8c41fed783"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_05_bellmite",
+        "fps": 8,
+        "height": 80,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#D888A0",
+          "#8E4A5E",
+          "#E04838",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Bellmite Matron, clustered translucent pink bell cells surrounding amber nerve, wet top-left highlights; IN-PLACE pose change through cell compression and tendril curl, fixed nerve centre.",
+        "tier": "multi_frame_sheet",
+        "width": 80
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_06_piston_worm",
+        "opaque_bbox": [
+          2,
+          2,
+          93,
+          61
+        ],
+        "palette_count": 6,
+        "png_paths": [
+          "boss_06_piston_worm/boss_06_piston_worm_attack_00.png",
+          "boss_06_piston_worm/boss_06_piston_worm_attack_01.png",
+          "boss_06_piston_worm/boss_06_piston_worm_attack_02.png",
+          "boss_06_piston_worm/boss_06_piston_worm_attack_03.png"
+        ],
+        "sha256": "6d964d50959a754aa34a903188c3d66dfc8009037b7c43d6afc6a96dce342ba1"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_06_piston_worm",
+        "fps": 8,
+        "height": 64,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#D888A0",
+          "#8E4A5E",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Transit Piston, telescoping plated worm head with pink hydraulic throat and orange valve core, top-left matte metal and wet tissue; IN-PLACE pose change through jaw spread and piston sleeve flex, fixed head anchor.",
+        "tier": "multi_frame_sheet",
+        "width": 96
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_07_dop_regent",
+        "opaque_bbox": [
+          17,
+          2,
+          46,
+          61
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "boss_07_dop_regent/boss_07_dop_regent_attack_00.png",
+          "boss_07_dop_regent/boss_07_dop_regent_attack_01.png",
+          "boss_07_dop_regent/boss_07_dop_regent_attack_02.png",
+          "boss_07_dop_regent/boss_07_dop_regent_attack_03.png"
+        ],
+        "sha256": "fb7588b505a9a6fce4971fdab3f1bbfab65a09361e57cc80ea2d5933445353d8"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_07_dop_regent",
+        "fps": 8,
+        "height": 64,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#E04838",
+          "#8E2318",
+          "#D888A0",
+          "#8A9099"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Dop Regent, crowned chitin clone commanding smaller shielded doubles with pale front cores, glossy top-left light; IN-PLACE pose change through crown unfolding and front iris opening, fixed thorax.",
+        "tier": "multi_frame_sheet",
+        "width": 64
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_08_hatch_warden",
+        "opaque_bbox": [
+          1,
+          1,
+          94,
+          62
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "boss_08_hatch_warden/boss_08_hatch_warden_attack_00.png",
+          "boss_08_hatch_warden/boss_08_hatch_warden_attack_01.png",
+          "boss_08_hatch_warden/boss_08_hatch_warden_attack_02.png",
+          "boss_08_hatch_warden/boss_08_hatch_warden_attack_03.png"
+        ],
+        "sha256": "1ace59751c2481805122b1dfecd6c608b90482a98eebdb174fc586add5be6824"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_08_hatch_warden",
+        "fps": 8,
+        "height": 64,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#C8372D",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Hatch Warden, ceiling cargo maw with riveted shutter doors and amber furnace eye, hard top-left matte light; IN-PLACE pose change through shutters opening and hanging claws curling, fixed ceiling mount.",
+        "tier": "multi_frame_sheet",
+        "width": 96
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_09_guarded_core",
+        "opaque_bbox": [
+          3,
+          1,
+          92,
+          77
+        ],
+        "palette_count": 6,
+        "png_paths": [
+          "boss_09_guarded_core/boss_09_guarded_core_attack_00.png",
+          "boss_09_guarded_core/boss_09_guarded_core_attack_01.png",
+          "boss_09_guarded_core/boss_09_guarded_core_attack_02.png",
+          "boss_09_guarded_core/boss_09_guarded_core_attack_03.png"
+        ],
+        "sha256": "c2c4fc5386bb187929e3ec0276c5d67704a45109b2ccca6b1264e54e483a35ed"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_09_guarded_core",
+        "fps": 8,
+        "height": 80,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#E04838",
+          "#8E2318",
+          "#F2A03D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Citadel Heart, armoured ring guards around molten red-orange reactor, hard top-left matte plates and glossy core; IN-PLACE pose change as ring shutters spread and contract, fixed reactor hub.",
+        "tier": "multi_frame_sheet",
+        "width": 96
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_10_overmind",
+        "opaque_bbox": [
+          3,
+          2,
+          123,
+          93
+        ],
+        "palette_count": 8,
+        "png_paths": [
+          "boss_10_overmind/boss_10_overmind_attack_00.png",
+          "boss_10_overmind/boss_10_overmind_attack_01.png",
+          "boss_10_overmind/boss_10_overmind_attack_02.png",
+          "boss_10_overmind/boss_10_overmind_attack_03.png"
+        ],
+        "sha256": "c5b23721d06c1ddd1f454f7c42c3118bc98a270d191dcfa0eb54194dc10a8b2e"
+      },
+      "request": {
+        "animations": {
+          "attack": 4
+        },
+        "asset_id": "boss_10_overmind",
+        "fps": 8,
+        "height": 96,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#D888A0",
+          "#8E4A5E",
+          "#E04838",
+          "#F2A03D",
+          "#6FC3F7"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Vorn Overmind, bifurcated pink brain inside ribbed silver crown with twin orange hearts and blue neural eye, hard top-left metal and wet tissue light; IN-PLACE pose change through rib opening, tendon curl and iris pulse, fixed brain centre.",
+        "tier": "multi_frame_sheet",
+        "width": 128
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "tileset_metal",
+        "opaque_bbox": [
+          2,
+          1,
+          125,
+          14
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "tileset_metal/tileset_metal_strip_00.png"
+        ],
+        "sha256": "0e0583cce88c50683949062f0408b5424a91c46781b77ed0cf06cc321836b280"
+      },
+      "request": {
+        "animations": {
+          "strip": 1
+        },
+        "asset_id": "tileset_metal",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#0B0E1A",
+          "#3FA34D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Eight 16x16 riveted grey corridor tiles: plate, pipe, vent, cable, upper lip, lower lip, inner corner, endcap; top-left matte highlights, inset continuous plating with transparent outer rim and dark mortar.",
+        "tier": "static_tween",
+        "width": 128
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "tileset_flesh",
+        "opaque_bbox": [
+          2,
+          1,
+          125,
+          14
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "tileset_flesh/tileset_flesh_strip_00.png"
+        ],
+        "sha256": "4ab2b1e5a426fb8e48cd95cfff5a5590f246fcd6d7ddb5b09d9aef4135c19564"
+      },
+      "request": {
+        "animations": {
+          "strip": 1
+        },
+        "asset_id": "tileset_flesh",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#D888A0",
+          "#8E4A5E",
+          "#8E2318",
+          "#0B0E1A"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Eight 16x16 organic tunnel tiles: sinew, rib, sac, vein, upper lip, lower lip, inner corner, endcap; wet top-left pink highlights, dense tissue inset from transparent outer rim.",
+        "tier": "static_tween",
+        "width": 128
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "tileset_ruins",
+        "opaque_bbox": [
+          2,
+          1,
+          125,
+          14
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "tileset_ruins/tileset_ruins_strip_00.png"
+        ],
+        "sha256": "8f264c807da4e8fcd95c66db03515a23301e971095b8e0660801b8438a84a618"
+      },
+      "request": {
+        "animations": {
+          "strip": 1
+        },
+        "asset_id": "tileset_ruins",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#0B0E1A",
+          "#C8372D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Eight 16x16 broken station tiles: fractured plate, bent rib, severed conduit, rubble, upper lip, lower lip, inner corner, endcap; hard top-left matte light, dense structure inset from transparent outer rim.",
+        "tier": "static_tween",
+        "width": 128
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "tileset_core",
+        "opaque_bbox": [
+          2,
+          1,
+          125,
+          14
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "tileset_core/tileset_core_strip_00.png"
+        ],
+        "sha256": "f7e998aa7c40274439f4fd5be6b45f4ae692b5058f43d2d5dd12df79ed68d43d"
+      },
+      "request": {
+        "animations": {
+          "strip": 1
+        },
+        "asset_id": "tileset_core",
+        "fps": 10,
+        "height": 16,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#4C525B",
+          "#E04838",
+          "#8E4A5E",
+          "#0B0E1A"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Eight 16x16 neural citadel tiles: ribbed shell, artery, guard socket, reactor conduit, upper lip, lower lip, inner corner, endcap; hard top-left metal and glossy red tissue light, dense structure inset from transparent outer rim.",
+        "tier": "static_tween",
+        "width": 128
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "star_spark",
+        "opaque_bbox": [
+          1,
+          1,
+          6,
+          6
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "star_spark/star_spark_glint_00.png"
+        ],
+        "sha256": "f86b4cc89ed01284c8b42742232d5a651fd4318c44590909ad54b31b5a68b0e9"
+      },
+      "request": {
+        "animations": {
+          "glint": 1
+        },
+        "asset_id": "star_spark",
+        "fps": 10,
+        "height": 8,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#6FC3F7",
+          "#8A9099"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Small asymmetrical four-point star with bright top-left core and dim blue ray shading, 16 opaque interior pixels and transparent perimeter, no full-frame background.",
+        "tier": "static_tween",
+        "width": 8
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "hud_panel",
+        "opaque_bbox": [
+          1,
+          1,
+          126,
+          22
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "hud_panel/hud_panel_panel_00.png"
+        ],
+        "sha256": "04dae018e92049929cc762b4252e42caf51dc18c94dd738f13d8d917bf433fb7"
+      },
+      "request": {
+        "animations": {
+          "panel": 1
+        },
+        "asset_id": "hud_panel",
+        "fps": 10,
+        "height": 24,
+        "hflip_reusable": false,
+        "palette_hex": [
+          "#0B0E1A",
+          "#4C525B",
+          "#8A9099",
+          "#6FC3F7"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Inset riveted navy HUD fascia with bevelled grey rails and blue instrument sockets, hard top-left matte light, transparent perimeter and open centre windows for legible text.",
+        "tier": "procedural_ui",
+        "width": 128
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "beam_gauge",
+        "opaque_bbox": [
+          1,
+          1,
+          62,
+          6
+        ],
+        "palette_count": 4,
+        "png_paths": [
+          "beam_gauge/beam_gauge_bar_00.png"
+        ],
+        "sha256": "fdb09657e5710f75652d3b18f2749dbe66ed71fc8433b05432d0fcb3581cfb2d"
+      },
+      "request": {
+        "animations": {
+          "bar": 1
+        },
+        "asset_id": "beam_gauge",
+        "fps": 10,
+        "height": 8,
+        "hflip_reusable": false,
+        "palette_hex": [
+          "#4C525B",
+          "#3E6EE0",
+          "#6FC3F7",
+          "#F2F2F2"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Blue segmented BEAM instrument with bevelled silver endcaps and three charge threshold notches, icy top-left gleam, transparent perimeter; fill masked by GUI.",
+        "tier": "procedural_ui",
+        "width": 64
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "life_icon",
+        "opaque_bbox": [
+          1,
+          1,
+          14,
+          6
+        ],
+        "palette_count": 3,
+        "png_paths": [
+          "life_icon/life_icon_icon_00.png"
+        ],
+        "sha256": "4b1cd686e574f0d4a848b5adbf228de407407b3639a584d4d33aa65576899133"
+      },
+      "request": {
+        "animations": {
+          "icon": 1
+        },
+        "asset_id": "life_icon",
+        "fps": 10,
+        "height": 8,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#8A9099",
+          "#3FA34D"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Miniature Lance wedge silhouette with green cockpit and top-left silver bevel, transparent perimeter, readable HUD life emblem.",
+        "tier": "static_tween",
+        "width": 16
+      }
+    },
+    {
+      "entry": {
+        "asset_id": "boss_core",
+        "opaque_bbox": [
+          1,
+          1,
+          22,
+          22
+        ],
+        "palette_count": 5,
+        "png_paths": [
+          "boss_core/boss_core_pulse_00.png",
+          "boss_core/boss_core_pulse_01.png"
+        ],
+        "sha256": "8a2852ee9e08614f547009cfbd14e186d4aa771da27b396a95a8da8c7d8c8261"
+      },
+      "request": {
+        "animations": {
+          "pulse": 2
+        },
+        "asset_id": "boss_core",
+        "fps": 10,
+        "height": 24,
+        "hflip_reusable": true,
+        "palette_hex": [
+          "#F2F2F2",
+          "#F2A03D",
+          "#C86A1E",
+          "#E04838",
+          "#8E2318"
+        ],
+        "pivot": "center",
+        "silhouette_prompt": "Reusable exposed molten reactor iris with red tooth ring and orange glossy heart, hard top-left glint; IN-PLACE pose change through iris dilation and ring claw curl, fixed core centre.",
+        "tier": "multi_frame_sheet",
+        "width": 24
+      }
+    }
+  ]
+}
