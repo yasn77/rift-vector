@@ -256,7 +256,7 @@ nodes {
 }
 nodes {
   position {
-    x: 96.0
+    x: 100.0
     y: 4.0
     z: 0.0
     w: 1.0
@@ -277,7 +277,7 @@ nodes {
 }
 nodes {
   position {
-    x: 0.0
+    x: -4.0
     y: 0.0
     z: 0.0
     w: 1.0
@@ -359,14 +359,14 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 2.0
-    y: 2.0
+    x: 1.0
+    y: 1.0
     z: 1.0
     w: 1.0
   }
   size {
-    x: 128.0
-    y: 24.0
+    x: 256.0
+    y: 48.0
     z: 0.0
     w: 1.0
   }
@@ -376,11 +376,18 @@ nodes {
   pivot: PIVOT_CENTER
   parent: "overlay_root"
   inherit_alpha: true
+  slice9 {
+    x: 16.0
+    y: 14.0
+    z: 70.0
+    w: 5.0
+  }
+  size_mode: SIZE_MODE_MANUAL
 }
 nodes {
   position {
     x: 0.0
-    y: 8.0
+    y: 11.0
     z: 0.0
     w: 1.0
   }
@@ -407,7 +414,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: -8.0
+    y: -7.0
     z: 0.0
     w: 1.0
   }
@@ -454,6 +461,7 @@ nodes {
   id: "fade_curtain"
   pivot: PIVOT_CENTER
   inherit_alpha: true
+  alpha: 0.0
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_DISABLED

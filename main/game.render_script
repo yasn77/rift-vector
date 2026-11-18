@@ -95,12 +95,11 @@ function update(self)
 
   render.set_blend_func(graphics.BLEND_FACTOR_SRC_ALPHA, graphics.BLEND_FACTOR_ONE_MINUS_SRC_ALPHA)
   render.enable_state(graphics.STATE_BLEND)
-  render.enable_state(graphics.STATE_DEPTH_TEST)
+  render.disable_state(graphics.STATE_DEPTH_TEST)
   render.set_depth_mask(false)
 
   render.draw(self.predicates.tile, state.world_opts)
   render.draw(self.predicates.particle, state.world_opts)
-  render.disable_state(graphics.STATE_DEPTH_TEST)
 
   render.set_view(state.identity_view)
   render.set_projection(state.gui_proj)

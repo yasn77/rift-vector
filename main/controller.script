@@ -18,6 +18,29 @@ local MSG_HUD_SYNC = hash("hud_sync")
 local MSG_ENABLE = hash("enable")
 local MSG_DISABLE = hash("disable")
 
+-- Photo-mode stepping constants: 4800 scroll ticks to 1920 px boss lock plus
+-- 108 ticks (1.80 s into the 6.0 s boss cycle), then 180-tick (3.0 s) half-cycle
+-- steps every 3.0 s of wall time to alternate closed and exposed weak-point states.
+local PHOTO_BOSS_TICKS = 4908
+local PHOTO_CYCLE_SECONDS = 3.0
+local PHOTO_CYCLE_TICKS = 180
+
+local function parse_photo_stage()
+  local raw = sys.get_config_string("rift.photo")
+  if raw == nil or raw == "" then
+    return nil
+  end
+  local parsed = tonumber(raw)
+  if parsed == nil then
+    return nil
+  end
+  local stage = math.floor(parsed)
+  if stage ~= parsed or stage < 1 or stage > 10 then
+    return nil
+  end
+  return stage
+end
+
 local EVENT_NAME_TO_HASH = {
   input_move = C.MSG_INPUT_MOVE,
   input_fire_press = C.MSG_INPUT_FIRE_PRESS,
@@ -234,15 +257,17 @@ local function sync_view(self)
   local sim = self.sim
   local on_title = (sim.screen == "title")
 
-  -- 1. Parallax 18-star field
+  -- 1. Parallax 18-star field (z=-0.90..-0.80, strictly behind terrain & entities;
+  -- Defold sorts the "tile" predicate back-to-front by ascending z with depth_mask=false).
   for i = 1, #sim.stars do
     local s = sim.stars[i]
-    local z = -0.65 + s.layer * 0.05
+    local z = -0.95 + s.layer * 0.05
     local star_actor = self.view.stars[i]
     if star_actor == nil then
       star_actor = spawn_actor("star_spark_glint", s.x, s.y, z, false, nil)
       self.view.stars[i] = star_actor
     else
+      set_actor_visible(star_actor, true)
       go.set_position(vmath.vector3(math.floor(s.x + 0.5), s.y, z), star_actor.id)
     end
   end
@@ -266,7 +291,7 @@ local function sync_view(self)
       end
     end
   end
-  sync_actor_map(self, self.view.stage_hulls, hull_items, "key", -0.38, true, function()
+  sync_actor_map(self, self.view.stage_hulls, hull_items, "key", -0.45, true, function()
     return "boss_03_iron_vesper_attack", true, nil, nil
   end)
 
@@ -373,7 +398,9 @@ local function flush_sim(self)
   local sim = self.sim
   if sim.stop_charge_audio then
     sim.stop_charge_audio = false
-    mixer_mod.stop_charge(self.mixer)
+    if not self.photo_mode then
+      mixer_mod.stop_charge(self.mixer)
+    end
   end
 
   if sim.hi_score_dirty then
@@ -385,15 +412,17 @@ local function flush_sim(self)
   for i = 1, #events do
     local ev = events[i]
     local ev_hash = EVENT_NAME_TO_HASH[ev.name]
-    if ev.name == "audio_request" then
-      local cue_id = ev.payload and ev.payload.cue_id
-      if cue_id then
-        self.audio_clock = self.audio_clock + 0.0001
-        mixer_mod.play(self.mixer, cue_id, self.audio_clock)
+    if not self.photo_mode then
+      if ev.name == "audio_request" then
+        local cue_id = ev.payload and ev.payload.cue_id
+        if cue_id then
+          self.audio_clock = self.audio_clock + 0.0001
+          mixer_mod.play(self.mixer, cue_id, self.audio_clock)
+        end
+      elseif ev.name == "screen_changed" then
+        local scr = ev.payload and ev.payload.screen
+        mixer_mod.set_paused(self.mixer, scr == "pause")
       end
-    elseif ev.name == "screen_changed" then
-      local scr = ev.payload and ev.payload.screen
-      mixer_mod.set_paused(self.mixer, scr == "pause")
     end
     if ev_hash ~= nil then
       broadcast_event(self, ev_hash, ev.payload)
@@ -419,6 +448,41 @@ local function flush_sim(self)
       screen = sim.screen,
       test_mode = sim.test_mode,
     })
+  end
+end
+
+---------------------------------------------------------------------------
+-- Shared deterministic test-stepping helpers (used by test_* & rift.photo)
+---------------------------------------------------------------------------
+
+local function apply_test_mode(self, enabled, fast_update)
+  self.sim.test_mode = enabled
+  mixer_mod.set_test_mode(self.mixer, enabled)
+  if enabled then
+    if fast_update then
+      pcall(sys.set_update_frequency, 300)
+    end
+    local disk_hi = load_disk_hi_score()
+    sim_mod.reset_to_title(self.sim, disk_hi)
+    flush_sim(self)
+  end
+end
+
+local function apply_test_set_stage(self, stage_num)
+  sim_mod.test_set_stage(self.sim, stage_num)
+  flush_sim(self)
+end
+
+local function advance_test_ticks(self, ticks)
+  if self.sim.test_mode and ticks > 0 then
+    local n = math.floor(ticks)
+    for _ = 1, n do
+      self.audio_clock = self.audio_clock + sim_mod.DT
+      sim_mod.step_tick(self.sim)
+      flush_sim(self)
+    end
+  else
+    flush_sim(self)
   end
 end
 
@@ -470,7 +534,11 @@ function init(self)
   self.hud_url = msg.url("hud#gui")
   self.tilemap_url = msg.url("terrain#tilemap")
   self.listeners = {}
-  self.bot_enabled = (sys.get_config_string("rift.bot") == "1")
+  self.photo_stage = parse_photo_stage()
+  self.photo_mode = (self.photo_stage ~= nil)
+  self.photo_timer = 0.0
+  self.photo_hud_synced = (not self.photo_mode)
+  self.bot_enabled = (not self.photo_mode) and (sys.get_config_string("rift.bot") == "1")
   if self.bot_enabled then
     local ok_b, exists_b = pcall(go.exists, "bot")
     if ok_b and exists_b then
@@ -482,7 +550,7 @@ function init(self)
   self.rms_frames = 0
   self.mixer = mixer_mod.new()
 
-  if html5 ~= nil and html5.set_interaction_listener ~= nil then
+  if (not self.photo_mode) and html5 ~= nil and html5.set_interaction_listener ~= nil then
     pcall(html5.set_interaction_listener, function(inst)
       mixer_mod.unlock_real_gesture(inst.mixer, inst.audio_clock)
     end)
@@ -522,15 +590,36 @@ function init(self)
     boss_parts = {},
   }
 
-  msg.post(".", "acquire_input_focus")
+  if self.photo_mode then
+    apply_test_mode(self, true, false)
+    apply_test_set_stage(self, self.photo_stage)
+    advance_test_ticks(self, PHOTO_BOSS_TICKS)
+    sync_view(self)
+  else
+    msg.post(".", "acquire_input_focus")
 
-  sim_mod.reset_to_title(self.sim, initial_hi)
-  flush_sim(self)
-  sync_view(self)
+    sim_mod.reset_to_title(self.sim, initial_hi)
+    flush_sim(self)
+    sync_view(self)
+  end
 end
 
 function update(self, dt)
   mixer_mod.end_batch(self.mixer)
+  if self.photo_mode then
+    if not self.photo_hud_synced then
+      self.photo_hud_synced = true
+      self.hud_cache.screen = ""
+      flush_sim(self)
+    end
+    self.photo_timer = self.photo_timer + math.min(dt, 0.1)
+    if self.photo_timer >= PHOTO_CYCLE_SECONDS then
+      self.photo_timer = self.photo_timer - PHOTO_CYCLE_SECONDS
+      advance_test_ticks(self, PHOTO_CYCLE_TICKS)
+    end
+    sync_view(self)
+    return
+  end
   if self.sim.test_mode then
     return
   end
@@ -555,7 +644,7 @@ local function update_kb_move(self)
 end
 
 function on_input(self, action_id, action)
-  if action_id == nil then
+  if self.photo_mode or action_id == nil then
     return false
   end
   if action.pressed then
@@ -641,6 +730,9 @@ function on_message(self, message_id, message, sender)
     or message_id == C.MSG_INPUT_START
     or message_id == C.MSG_INPUT_PAUSE
   then
+    if self.photo_mode then
+      return
+    end
     handle_command(self, message_id, message)
     if not self.sim.test_mode then
       sync_view(self)
@@ -650,20 +742,12 @@ function on_message(self, message_id, message, sender)
 
   if message_id == C.MSG_TEST_MODE then
     local enabled = (message ~= nil and message.enabled == true)
-    self.sim.test_mode = enabled
-    mixer_mod.set_test_mode(self.mixer, enabled)
-    if enabled then
-      pcall(sys.set_update_frequency, 300)
-      local disk_hi = load_disk_hi_score()
-      sim_mod.reset_to_title(self.sim, disk_hi)
-      flush_sim(self)
-    end
+    apply_test_mode(self, enabled, true)
     return
   end
 
   if message_id == C.MSG_TEST_SET_STAGE then
-    sim_mod.test_set_stage(self.sim, message and message.stage or 1)
-    flush_sim(self)
+    apply_test_set_stage(self, message and message.stage or 1)
     if not self.sim.test_mode then
       sync_view(self)
     end
@@ -672,16 +756,7 @@ function on_message(self, message_id, message, sender)
 
   if message_id == C.MSG_TEST_ADVANCE then
     local ticks = (message and tonumber(message.ticks)) or 0
-    if self.sim.test_mode and ticks > 0 then
-      local n = math.floor(ticks)
-      for _ = 1, n do
-        self.audio_clock = self.audio_clock + sim_mod.DT
-        sim_mod.step_tick(self.sim)
-        flush_sim(self)
-      end
-    else
-      flush_sim(self)
-    end
+    advance_test_ticks(self, ticks)
     if not self.sim.test_mode then
       sync_view(self)
     end

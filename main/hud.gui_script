@@ -27,7 +27,8 @@ local function update_readouts(self)
   end
 
   local frac = math.max(0.0, math.min(1.0, tonumber(self.beam_fraction) or 0.0))
-  gui.set_size(self.beam_clip, vmath.vector3(math.floor(64.0 * frac + 0.5), 8.0, 0.0))
+  local clip_w = math.min(54, math.floor(54.0 * frac + 0.5))
+  gui.set_size(self.beam_clip, vmath.vector3(clip_w, 8.0, 0.0))
   if self.beam_tier >= 3 then
     gui.set_color(self.beam_fill, COLOR_TIER_3)
   elseif self.beam_tier == 2 then
@@ -39,22 +40,28 @@ local function update_readouts(self)
   end
 end
 
-local function apply_screen_overlay(self, screen, prev_screen)
+local function apply_screen_overlay(self, screen, prev_screen, immediate)
   self.screen = screen
   gui.cancel_animations(self.fade_curtain, "color.w")
   gui.cancel_animations(self.overlay_root, "color.w")
 
   if screen == "play" then
     gui.set_enabled(self.overlay_root, false)
-    if (not self.test_mode) and prev_screen ~= "pause" and prev_screen ~= "play" then
+    if (not self.test_mode) and (not immediate) and prev_screen ~= "pause" and prev_screen ~= "play" then
+      gui.set_enabled(self.fade_curtain, true)
       gui.set_color(self.fade_curtain, vmath.vector4(0.0, 0.0, 0.0, 0.65))
-      gui.animate(self.fade_curtain, "color.w", 0.0, gui.EASING_LINEAR, 0.25, 0.0, nil, gui.PLAYBACK_ONCE_FORWARD)
+      gui.animate(self.fade_curtain, "color.w", 0.0, gui.EASING_LINEAR, 0.25, 0.0, function()
+        gui.set_enabled(self.fade_curtain, false)
+      end, gui.PLAYBACK_ONCE_FORWARD)
     else
       gui.set_color(self.fade_curtain, vmath.vector4(0.0, 0.0, 0.0, 0.0))
+      gui.set_enabled(self.fade_curtain, false)
     end
     return
   end
 
+  gui.set_enabled(self.fade_curtain, false)
+  gui.set_color(self.fade_curtain, vmath.vector4(0.0, 0.0, 0.0, 0.0))
   gui.set_enabled(self.overlay_root, true)
   if screen == "title" then
     gui.set_text(self.overlay_title, "RIFT VECTOR")
@@ -73,10 +80,9 @@ local function apply_screen_overlay(self, screen, prev_screen)
     gui.set_text(self.overlay_sub, string.format("FINAL %09d - PRESS ENTER", clamp_score(self.score)))
   end
 
-  -- Pause itself is immediate; cinematic transitions fade GUI alpha over 0.25 s linear.
-  if screen == "pause" or self.test_mode then
+  -- Initial title, pause and test_mode apply immediately; runtime transitions fade over 0.25 s linear.
+  if immediate or screen == "pause" or self.test_mode then
     gui.set_color(self.overlay_root, vmath.vector4(0.043, 0.055, 0.102, 0.92))
-    gui.set_color(self.fade_curtain, vmath.vector4(0.0, 0.0, 0.0, 0.0))
   else
     gui.set_color(self.overlay_root, vmath.vector4(0.043, 0.055, 0.102, 0.0))
     gui.animate(self.overlay_root, "color.w", 0.92, gui.EASING_LINEAR, 0.25, 0.0, nil, gui.PLAYBACK_ONCE_FORWARD)
@@ -108,7 +114,7 @@ function init(self)
   self.screen = "title"
 
   update_readouts(self)
-  apply_screen_overlay(self, "title", "title")
+  apply_screen_overlay(self, "title", "title", true)
 end
 
 function on_message(self, message_id, message, sender)
