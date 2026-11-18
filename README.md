@@ -64,8 +64,8 @@ Requires the Defold 1.14.1 toolchain (`bob.jar`) and JDK 25, or the
 java -jar bob.jar --root . resolve
 # compile / test / bundle
 java -jar bob.jar --root . build
-java -jar bob.jar --root . --variant release bundle --platform x86_64-linux --bundle-output build/linux
-java -jar bob.jar --root . --variant release bundle --platform wasm-web --bundle-output build/web
+java -jar bob.jar --root . --variant release --archive build bundle --platform x86_64-linux --bundle-output build/linux
+java -jar bob.jar --root . --variant release --archive build bundle --platform wasm-web --bundle-output build/web
 ```
 
 Asset pipeline (deterministic, gated): `defold-studio emit-constants / compile-sprites /

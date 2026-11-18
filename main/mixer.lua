@@ -58,7 +58,7 @@ local ALL_JINGLES = {
 local WEB_UNLOCK_JS = table.concat({
   "try{",
   "var ctx=(typeof Module!=='undefined'&&Module.SDL2&&Module.SDL2.audioContext)",
-  "||(typeof DM Sound!=='undefined'&&DMSound.context)||null;",
+  "||(typeof DMSound!=='undefined'&&DMSound.context)||null;",
   "if(ctx&&ctx.state==='suspended'){ctx.resume();}",
   "}catch(e){}",
 })
