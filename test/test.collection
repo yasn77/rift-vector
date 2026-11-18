@@ -1,0 +1,21 @@
+name: "test"
+collection_instances {
+  id: "game"
+  collection: "/main/main.collection"
+}
+embedded_instances {
+  id: "runner"
+  data: "components {\n"
+  "  id: \"runner\"\n"
+  "  component: \"/test/runner.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "bot_compile_check"
+  data: "components {\n"
+  "  id: \"bot\"\n"
+  "  component: \"/test/bot.script\"\n"
+  "}\n"
+  ""
+}
