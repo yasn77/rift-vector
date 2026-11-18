@@ -31,6 +31,10 @@ python3 -m http.server 8080
 ```
 Audio unlocks on your first key press (browser policy).
 
+On phones and tablets the game uses native touch controls: drag the left side to move,
+hold the lower-right to fire/charge, tap the upper-right for the Force, tap to confirm
+menus, and use the pause button or a two-finger tap to pause. Landscape is recommended.
+
 ## Controls
 
 | Key | Action |
