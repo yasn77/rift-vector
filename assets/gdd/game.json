@@ -5,7 +5,7 @@
   "resolution": [320, 200],
   "palette_hex": ["#000000", "#0B0E1A", "#F2F2F2", "#8A9099", "#4C525B", "#3FA34D", "#C8372D", "#E04838", "#8E2318", "#F2A03D", "#C86A1E", "#3E6EE0", "#6FC3F7", "#E8D040", "#D888A0", "#8E4A5E"],
   "input_actions": ["move_up", "move_down", "move_left", "move_right", "fire", "force", "start", "pause"],
-  "message_ids": ["input_move", "input_fire_press", "input_fire_release", "input_force", "input_start", "input_pause", "player_hit", "enemy_killed", "score_add", "powerup_collected", "stage_clear", "boss_defeated", "game_over", "wave_charge", "force_state", "checkpoint_reached", "audio_request", "screen_changed", "test_mode", "test_advance", "test_spawn_report", "test_set_stage"],
+  "message_ids": ["input_move", "input_fire_press", "input_fire_release", "input_force", "input_start", "input_pause", "player_hit", "enemy_killed", "score_add", "powerup_collected", "stage_clear", "boss_defeated", "game_over", "wave_charge", "force_state", "checkpoint_reached", "audio_request", "screen_changed", "test_mode", "test_advance", "test_spawn_report", "test_set_stage", "viewport_map", "test_touch"],
   "collision_groups": {
     "player": ["enemy", "enemy_shot", "terrain", "powerup", "force_pod", "boss"],
     "player_shot": ["enemy", "terrain", "boss"],
@@ -50,7 +50,8 @@
     "The Linux release runs on both Vulkan and OpenGL using the wired application manifest, while the web release loads and runs its WebGL engine with the same keyboard and bot-message controls.",
     "All shipped visual assets use the declared 16-colour art family, nearest-neighbour display and original biomechanical designs with a visual-cohesion score of at least 70.",
     "Audio unlock follows a real start gesture on web, charge audio stops on release/death/pause, and only the seven allowed STUDIO_TELEMETRY event types enter that channel.",
-    "In test mode the simulation advances only through test_advance and reports state through test_spawn_report."
+    "In test mode the simulation advances only through test_advance and reports state through test_spawn_report.",
+    "On touch devices a left-zone drag moves the ship, right-lower hold fires/charges, right-upper taps the Force, any tap confirms menus, and the pause button/two-finger tap pauses — all through the same command path as the keyboard."
   ],
   "sprites": [
     {"asset_id":"ship","tier":"multi_frame_sheet","width":32,"height":16,"animations":{"fly":4},"palette_hex":["#F2F2F2","#8A9099","#4C525B","#3FA34D","#F2A03D"],"silhouette_prompt":"RV-7 Lance, right-facing riveted silver wedge fighter with green cockpit, Amiga biomechanical pixel art and hard top-left matte rim light; IN-PLACE pose change through exhaust flicker and intake vane flex, fixed hull anchor.","fps":10,"pivot":"center","hflip_reusable":true},
