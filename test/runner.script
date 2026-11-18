@@ -1,0 +1,136 @@
+-- test/runner.script -- blind deftest runner for Rift Vector.
+--
+-- Mounted in /test/test.collection alongside sub-collection `game`
+-- (/main/main.collection). Waits for title-screen readiness (`screen_changed`
+-- with screen="title", or bounded frame settle when unimplemented), runs all
+-- registered deftest modules, emits `TEST {...}` structured lines for
+-- defold_test_run, and never writes to STUDIO_TELEMETRY.
+
+local deftest = require "deftest.deftest"
+local telescope = require "deftest.telescope"
+local driver = require "bot_driver"
+local H = require "test.harness"
+
+local t_01 = require "test.t_01_portability_art"
+local t_02 = require "test.t_02_telemetry_and_testmode"
+local t_03 = require "test.t_03_movement_and_fire"
+local t_04 = require "test.t_04_force_and_weapons"
+local t_05 = require "test.t_05_economy_death_score"
+local t_06 = require "test.t_06_stages_and_ramp"
+local t_07 = require "test.t_07_bosses_all_ten"
+local t_08 = require "test.t_08_hud_pause_screens"
+
+local MODULES = { t_01, t_02, t_03, t_04, t_05, t_06, t_07, t_08 }
+
+local function encode_test_json(fields)
+  local parts = {}
+  for i = 1, #fields do
+    local k = fields[i][1]
+    local v = fields[i][2]
+    if type(v) == "number" then
+      parts[#parts + 1] = driver.quote(k) .. ":" .. string.format("%d", v)
+    else
+      parts[#parts + 1] = driver.quote(k) .. ":" .. driver.quote(tostring(v))
+    end
+  end
+  return "{" .. table.concat(parts, ",") .. "}"
+end
+
+local function extract_failure_message(result)
+  local msg = result.message
+  if type(msg) == "table" then
+    msg = msg[1]
+  end
+  msg = tostring(msg or "")
+  if #msg > 450 then
+    msg = string.sub(msg, 1, 450) .. "..."
+  end
+  return msg
+end
+
+local function emit_test_end(result, status, err_text)
+  local full_name = tostring(result.context or "") .. ": " .. tostring(result.name or "")
+  print("TEST " .. encode_test_json({
+    { "event", "test_end" },
+    { "run", H.RUN_ID },
+    { "name", full_name },
+    { "status", status },
+    { "error", err_text or "" },
+  }))
+end
+
+local any_non_passing = false
+
+local function install_hooks()
+  local orig_run = telescope.run
+  telescope.run = function(contexts, callbacks, filter)
+    callbacks = callbacks or {}
+    callbacks.pass = function(result)
+      emit_test_end(result, "pass", "")
+    end
+    callbacks.fail = function(result)
+      emit_test_end(result, "fail", extract_failure_message(result))
+    end
+    callbacks.err = function(result)
+      emit_test_end(result, "fail", "runtime error: " .. extract_failure_message(result))
+    end
+    callbacks.unassertive = function(result)
+      emit_test_end(result, "fail", "unassertive test made zero assertions")
+    end
+    callbacks.pending = function(result)
+      emit_test_end(result, "fail", "pending/skipped behavioural test is forbidden")
+    end
+    return orig_run(contexts, callbacks, filter)
+  end
+
+  local orig_summary = telescope.summary_report
+  telescope.summary_report = function(contexts, results)
+    local text, tally = orig_summary(contexts, results)
+    local failed_total = tally.failed + tally.errors + tally.unassertive + tally.pending
+    any_non_passing = (failed_total > 0)
+    print("TEST " .. encode_test_json({
+      { "event", "suite_end" },
+      { "run", H.RUN_ID },
+      { "status", failed_total == 0 and "pass" or "fail" },
+      { "passed", tally.passed },
+      { "failed", failed_total },
+    }))
+    return text, tally
+  end
+
+  local orig_exit = os.exit
+  os.exit = function(code)
+    if any_non_passing and (code == nil or code == 0) then
+      code = 1
+    end
+    orig_exit(code)
+  end
+end
+
+function init(self)
+  H.seed_saves(H.SEEDED_HI)
+  install_hooks()
+  for i = 1, #MODULES do
+    deftest.add(MODULES[i])
+  end
+  self.suite_started = false
+  self.boot_frames = 0
+  -- Register runner as test_mode listener early so title screen_changed reaches us.
+  H.post("test_mode", { enabled = true })
+end
+
+function update(self, dt)
+  if not self.suite_started then
+    self.boot_frames = self.boot_frames + 1
+    if H.saw_title_screen() or self.boot_frames >= 4 then
+      self.suite_started = true
+      deftest.run()
+    end
+    return
+  end
+  H.on_update()
+end
+
+function on_message(self, message_id, message, sender)
+  H.on_message(message_id, message)
+end

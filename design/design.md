@@ -29,10 +29,10 @@ Graph: **1 → (2 ∥ 3) → 4 → 5 → 6**. Art and audio use disjoint directo
 | `resolution` | 320×200 logical px; window 960×600 px; nearest-neighbour, integer upscale with letterboxing |
 | `palette_hex` | 16 colours: black/deep space, three greys, green, three reds, two oranges, two blues, yellow, two flesh tones; exact hex values in JSON |
 | `input_actions` | Eight actions: four movement axes, fire, force, start, pause; bindings below |
-| `message_ids` | 18 identifiers, payloads below; bot and keyboard share one command path |
+| `message_ids` | 22 identifiers, payloads below; bot and keyboard share one command path |
 | `collision_groups` | Eight symmetric masks in JSON; bits share `force_pod`, with ram damage disabled for bits |
 | `screens` | `title`, `play`, `pause`, `stage_clear`, `game_over`, `victory` |
-| `atomic_requirements` | 32 independently assertable sentences; timing comparisons use simulation time with one 60 Hz tick tolerance |
+| `atomic_requirements` | 33 independently assertable sentences; timing comparisons use simulation time with one 60 Hz tick tolerance |
 | `sprites` | 48 requests, one animation each; 8×8 to 128×96 px; strips 128×16 px; every pivot `center`; frame rates 8/10/12/16 fps as declared |
 | `audio_cues` | 22 cues: 13 effects, six music loops, three non-looping jingles; route `parametric_synth`; 44,100 Hz, cooldown 0.06 s |
 | `platforms` | `x86_64-linux`: OpenGL + Vulkan, `main/game.appmanifest`; `wasm-web`: WebGL, manifest null |
@@ -120,6 +120,8 @@ Award kills only once per deterministic `(stage, spawn_id)` in a score run to pr
 
 Keys on both targets: arrows/WASD movement; Z/Space fire; X/Left-Shift Force; Enter start/confirm/continue; P pause. Keyboard input and the blind bot call identical handlers. Bot messages target the gameplay controller at `/game#controller`, available on title and throughout play; displacement persists until superseded by `input_move`. Opposite keys cancel; normalize non-zero diagonals. No input changes simulation while paused except pause itself; start and movement then have no gameplay effect.
 
+**Collection structure and test URLs.** `main.collection` contains the gameplay controller as embedded instance `game` with script component `controller`, giving `/game#controller` under normal bootstrap. The blind deftest suite runs from `test/test.collection`, which `defold_test_run` bootstraps as the entry collection; it embeds `/main/main.collection` as sub-collection `game`, composing the controller URL to `/game/game#controller`. Test modules must target this composed URL through a resolving helper in the test harness; normal play and the bot run bootstrap `main.collection` and retain `/game#controller`. `main.collection` also embeds instance `bot` with a script component referencing `/test/bot.script`; it is inert unless custom configuration key `rift.bot`, read via `sys.get_config_string`, equals `"1"`, leaving normal play and deftest runs unaffected. The bot wrapper requires the root module `bot_driver`. The controller must answer the four test observables (`test_mode`, `test_advance`, `test_spawn_report`, `test_set_stage`) identically in both URL contexts.
+
 | Message | Payload and interpretation |
 | --- | --- |
 | `input_move` | `{dx:number, dy:number}` each −1..1, positive right/up, normalize magnitude above 1; `{0,0}` stops |
@@ -138,6 +140,14 @@ Keys on both targets: arrows/WASD movement; Z/Space fire; X/Left-Shift Force; En
 | `checkpoint_reached` | `{stage:integer, scroll_px:1152}` |
 | `audio_request` | `{cue_id:string}`; mixer applies cue/group policy |
 | `screen_changed` | `{screen:string}` from the six declared screens |
+| `test_mode` | `{enabled:boolean}`; sent to `/game#controller` before `input_start`; when enabled, simulation advances only via `test_advance`, never wall-clock updates, RNG remains seeded/deterministic, and the controller answers each advance with `test_spawn_report`; normal play is unaffected when disabled |
+| `test_advance` | `{ticks:integer}`; in test mode, synchronously advances the simulation exactly N 60 Hz ticks, stepping input edges, tweens, spawns, collisions and scoring, then emits one `test_spawn_report` |
+| `test_spawn_report` | `{scroll_px:number, enemies:[{spawn_id:string, kind:string, x:number, y:number, hp:integer}], hostile_bullets:integer, boss:{hp:integer, exposed:boolean}\|null, force:{state:string, level:integer, weapon:string}, score:integer, lives:integer, screen:string}`; observable state snapshot, with numbers represented as numbers and one-level nesting only |
+| `test_set_stage` | `{stage:integer}`; test-mode only; loads stage N's deterministic data at scroll 0 with its boss encounter reachable by advancing, so each boss can be tested without playing prior stages |
+
+**Test-mode atomic requirement:** In test mode the simulation advances only through test_advance and reports state through test_spawn_report.
+
+**Blind-test resource contract.** The build must declare `[project] custom_resources = /main/game.appmanifest,/assets/sprites/manifest.json,/assets/audio/audio_manifest.json` so blind deftest checks can read these resources through `sys.load_resource`; `[native_extension] app_manifest = /main/game.appmanifest` must be assertable through `sys.get_config_string`.
 
 `STUDIO_TELEMETRY` carries **ONLY** `bot_input`, `audio_play`, `audio_cooldown_suppressed`, `audio_unlock`, `audio_unlock_skipped`, `audio_rms`, `audio_reset`, emitted through the shipped studio runtime schemas. Gameplay messages are not telemetry events. Suite summaries use **deftest**, never this channel; the bot finishes through the system exit message with explicit success/failure code. Capture bot-driven input, actual audio playback and RMS plus non-empty PNG frames. Web real Enter gesture unlocks audio; synthetic bot input alone must not claim a user unlock.
 
@@ -167,7 +177,7 @@ All music is original seeded FM+PSG-style composition in 4/4; `synth_spec` suppl
 - **Phase 2:** `verify-sprites` reports zero findings for all 48 requests, with authored in-place poses, shared clip palettes, intact borders and no primitive shipping art.
 - **Phase 3:** `verify-audio` reports zero findings across all 22 mastered cues, with six bar-exact loops, distinct SFX seeds and the declared FM/PSG composition character.
 - **Phase 4:** structured Defold 1.14.1 compilation returns `ok: true` with empty diagnostics for integrated art, audio, gameplay, HUD and the wired Linux manifest.
-- **Phase 5:** immutable blind tests pass all 32 atomic requirements and stage-specific patterns with `failed: 0` and exit 0, including edge-time fire semantics, save restart, all ten bosses and continue economy.
+- **Phase 5:** immutable blind tests pass all 33 atomic requirements and stage-specific patterns with `failed: 0` and exit 0, including edge-time fire semantics, save restart, all ten bosses and continue economy.
 - **Phase 6:** factual Stage-2a inspection quotes captured frames, Stage-2b `verify-tier2` passes with cohesion ≥70 and no failure route, the reviewer approves, telemetry verification has zero findings, and both target-runtime proofs below pass.
 - **Linux target:** bundle `x86_64-linux`, wire `[native_extension] app_manifest = /main/game.appmanifest` to `main/game.appmanifest`, verify compiled `.spc` contains GLSL 330 and SPIR-V variants, then run that bundle separately with explicitly selected Vulkan and OpenGL under xvfb, recording the selected adapter, allowed telemetry, non-empty captured gameplay PNG and scripted clean exit 0 for each backend.
 - **Web target:** bundle `wasm-web` with WebGL and no manifest, verify `index.html`, a `.wasm` module and `game.arcd` exist, serve the bundle over local HTTP, and use a real browser to load index, observe successful engine/Wasm initialization without console or network errors, press Enter to unlock/start, drive the same bot messages, capture allowed telemetry and a non-empty gameplay PNG, and record successful suite completion before closing the page.

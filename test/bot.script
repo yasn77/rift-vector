@@ -1,0 +1,133 @@
+-- test/bot.script -- Defold wrapper for automated Rift Vector headless/web runs.
+--
+-- Embedded in /main/main.collection on instance `bot`. Completely inert unless
+-- custom configuration key `rift.bot` equals `"1"`, leaving normal human play and
+-- the blind deftest suite unaffected.
+--
+-- Drives `/game#controller` exclusively through the published input messages and
+-- terminates via `@system:` `exit` once the scripted showcase has completed and
+-- liveness observables (`screen_changed` -> `"play"`, `score_add` > 0) are met.
+-- Diagnostics print on `RIFT_BOT_DIAG`, never on `STUDIO_TELEMETRY`.
+
+local driver = require "bot_driver"
+
+local H_SCREEN_CHANGED = hash("screen_changed")
+local H_SCORE_ADD = hash("score_add")
+local H_GAME_OVER = hash("game_over")
+local H_STAGE_CLEAR = hash("stage_clear")
+
+local function diag(text)
+  print("RIFT_BOT_DIAG " .. text)
+end
+
+local function read_int_config(key, fallback)
+  local raw = sys.get_config_string(key)
+  local parsed = raw and tonumber(raw)
+  if parsed and parsed >= 1 then
+    return math.floor(parsed)
+  end
+  return fallback
+end
+
+function init(self)
+  self.active = (sys.get_config_string("rift.bot") == "1")
+  self.finished = false
+  if not self.active then
+    return
+  end
+
+  local seed = read_int_config("rift.bot_seed", 20261117)
+  self.max_frames = read_int_config("rift.bot_max_frames", 1200)
+  local ctrl_path = sys.get_config_string("rift.bot_controller")
+  if not ctrl_path or ctrl_path == "" then
+    ctrl_path = "/game#controller"
+  end
+  self.controller = msg.url(ctrl_path)
+  self.bot = driver.new({ seed = seed })
+  self.saw_play = false
+  self.score = 0
+  self.start_retried = false
+  self.last_action = nil
+  diag(string.format("boot seed=%d max_frames=%d target=%s", seed, self.max_frames, ctrl_path))
+end
+
+local function finish(self, code, reason)
+  if self.finished then
+    return
+  end
+  self.finished = true
+  diag(string.format(
+    "status=%s code=%d frame=%d saw_play=%s score=%d reason=%s",
+    code == 0 and "pass" or "fail",
+    code,
+    self.bot and self.bot.frame or 0,
+    tostring(self.saw_play),
+    self.score,
+    reason
+  ))
+  msg.post("@system:", "exit", { code = code })
+end
+
+function update(self, dt)
+  if not self.active or self.finished then
+    return
+  end
+
+  -- If the initial frame-1 start preceded controller init, inject one retry.
+  if self.bot.frame == 20 and not self.saw_play and not self.start_retried then
+    self.start_retried = true
+    self.last_action = nil
+    driver.inject(self.bot, "start", 1)
+  end
+
+  local action, frame = driver.next(self.bot)
+  if action ~= self.last_action then
+    self.last_action = action
+    local message_id, payload = driver.message(action)
+    if message_id ~= nil then
+      msg.post(self.controller, message_id, payload)
+    end
+  end
+
+  if driver.scripted_done(self.bot) and self.saw_play and self.score > 0 then
+    finish(self, 0, "liveness_and_scripted_session_complete")
+    return
+  end
+
+  if frame >= self.max_frames then
+    local missing = {}
+    if not self.saw_play then
+      missing[#missing + 1] = "no_screen_changed_play"
+    end
+    if self.score <= 0 then
+      missing[#missing + 1] = "no_positive_score_add"
+    end
+    if not driver.scripted_done(self.bot) then
+      missing[#missing + 1] = "scripted_segment_incomplete"
+    end
+    finish(self, 1, table.concat(missing, "+"))
+  end
+end
+
+function on_message(self, message_id, message, sender)
+  if not self.active or self.finished then
+    return
+  end
+
+  if message_id == H_SCREEN_CHANGED then
+    if message and message.screen == "play" then
+      self.saw_play = true
+    elseif message and (message.screen == "game_over" or message.screen == "stage_clear") then
+      self.last_action = nil
+      driver.inject(self.bot, "start", 1)
+    end
+  elseif message_id == H_SCORE_ADD then
+    local amount = message and message.amount
+    if type(amount) == "number" and amount > 0 then
+      self.score = self.score + amount
+    end
+  elseif message_id == H_GAME_OVER or message_id == H_STAGE_CLEAR then
+    self.last_action = nil
+    driver.inject(self.bot, "start", 1)
+  end
+end
