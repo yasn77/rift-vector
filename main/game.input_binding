@@ -58,3 +58,7 @@ key_trigger {
   input: KEY_P
   action: "pause"
 }
+touch_trigger {
+  input: TOUCH_MULTI
+  action: "touch"
+}

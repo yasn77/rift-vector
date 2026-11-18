@@ -1,5 +1,5 @@
 -- main/controller.script -- Gameplay controller (/game#controller) for Rift Vector.
--- Owns the 22-message contract, shared keyboard/bot command routing, hi-score
+-- Owns the 24-message contract, shared keyboard/bot/touch command routing, hi-score
 -- sys.save persistence, audio mixer coordination, and sprite/tilemap/HUD view sync.
 -- Strict Lua 5.1, British English (Oxford spelling).
 
@@ -15,8 +15,26 @@ go.property("ts_ruins", resource.tile_source("/main/tileset_ruins.tilesource"))
 go.property("ts_core", resource.tile_source("/main/tileset_core.tilesource"))
 
 local MSG_HUD_SYNC = hash("hud_sync")
+local MSG_TOUCH_HINT = hash("touch_hint")
+local MSG_REGISTER_VIEWPORT = hash("register_viewport")
 local MSG_ENABLE = hash("enable")
 local MSG_DISABLE = hash("disable")
+local ACTION_TOUCH = hash("touch")
+
+-- Touch zone & two-finger tap constants (logical 320x200 space; playfield y=24..200)
+local TOUCH_PLAY_MIN_X = 0.0
+local TOUCH_PLAY_MAX_X = 320.0
+local TOUCH_PLAY_MIN_Y = 24.0
+local TOUCH_PLAY_MAX_Y = 200.0
+local TOUCH_SPLIT_X = 192.0
+local TOUCH_SPLIT_Y = 112.0
+local TOUCH_PAUSE_MIN_X = 300.0
+local TOUCH_PAUSE_MAX_X = 316.0
+local TOUCH_PAUSE_MIN_Y = 184.0
+local TOUCH_PAUSE_MAX_Y = 196.0
+local TWO_FINGER_CHORD_MAX_S = 0.08
+local TWO_FINGER_TAP_MAX_S = 0.30
+local TWO_FINGER_TAP_SLOP_PX = 8.0
 
 -- Photo-mode stepping constants: 4800 scroll ticks to 1920 px boss lock plus
 -- 108 ticks (1.80 s into the 6.0 s boss cycle), then 180-tick (3.0 s) half-cycle
@@ -394,6 +412,23 @@ end
 -- Flush simulation events, audio cues, hi-score & HUD state
 ---------------------------------------------------------------------------
 
+local function reset_touch_captures(self)
+  local t = self.touch
+  if t == nil then
+    return
+  end
+  for pid, slot in pairs(t.tracked) do
+    if slot ~= nil then
+      t.ignored_ids[pid] = true
+    end
+  end
+  t.tracked = {}
+  t.tracked_count = 0
+  t.move_id = nil
+  t.fire_id = nil
+  t.two_finger = nil
+end
+
 local function flush_sim(self)
   local sim = self.sim
   if sim.stop_charge_audio then
@@ -412,6 +447,9 @@ local function flush_sim(self)
   for i = 1, #events do
     local ev = events[i]
     local ev_hash = EVENT_NAME_TO_HASH[ev.name]
+    if ev.name == "player_hit" or ev.name == "screen_changed" then
+      reset_touch_captures(self)
+    end
     if not self.photo_mode then
       if ev.name == "audio_request" then
         local cue_id = ev.payload and ev.payload.cue_id
@@ -487,7 +525,7 @@ local function advance_test_ticks(self, ticks)
 end
 
 ---------------------------------------------------------------------------
--- Shared command router (identical path for keyboard and bot messages)
+-- Shared command router (identical path for keyboard, bot and touch)
 ---------------------------------------------------------------------------
 
 local function lock_held_keys_until_release(self)
@@ -503,7 +541,11 @@ end
 local function handle_command(self, message_id, message)
   local sim = self.sim
   if message_id == C.MSG_INPUT_MOVE then
-    sim_mod.input_move(sim, message and message.dx or 0, message and message.dy or 0)
+    if message and message.drag_x ~= nil and message.drag_y ~= nil then
+      sim_mod.input_drag_to(sim, message.drag_x, message.drag_y)
+    else
+      sim_mod.input_move(sim, message and message.dx or 0, message and message.dy or 0)
+    end
   elseif message_id == C.MSG_INPUT_FIRE_PRESS then
     sim_mod.input_fire_press(sim)
   elseif message_id == C.MSG_INPUT_FIRE_RELEASE then
@@ -519,9 +561,371 @@ local function handle_command(self, message_id, message)
     local res = sim_mod.input_pause(sim)
     if res == "paused" or res == "resumed" then
       lock_held_keys_until_release(self)
+      reset_touch_captures(self)
     end
   end
   flush_sim(self)
+end
+
+---------------------------------------------------------------------------
+-- Shared native / test_touch state machine
+---------------------------------------------------------------------------
+
+local function screen_to_logical(self, sx, sy)
+  local vp = self.viewport
+  local sc = (vp and vp.scale and vp.scale > 1e-6) and vp.scale or 3.0
+  local ox = (vp and vp.ox) or 0.0
+  local oy = (vp and vp.oy) or 0.0
+  return (sx - ox) / sc, (sy - oy) / sc
+end
+
+local function apply_viewport_map(self, scale, ox, oy)
+  if type(scale) ~= "number" or scale <= 1e-6 then
+    return
+  end
+  local new_ox = tonumber(ox) or 0.0
+  local new_oy = tonumber(oy) or 0.0
+  local vp = self.viewport
+  vp.scale = scale
+  vp.ox = new_ox
+  vp.oy = new_oy
+
+  -- Rebase active MOVE drag anchor to current ship and finger logical coords to prevent resize jumps
+  local t = self.touch
+  if t ~= nil and t.move_id ~= nil then
+    local mslot = t.tracked[t.move_id]
+    if mslot ~= nil then
+      local lx, ly = screen_to_logical(self, mslot.last_sx, mslot.last_sy)
+      mslot.anchor_lx = lx
+      mslot.anchor_ly = ly
+      mslot.anchor_ship_x = self.sim.ship.x
+      mslot.anchor_ship_y = self.sim.ship.y
+    end
+  end
+
+  msg.post(self.hud_url, C.MSG_VIEWPORT_MAP, {
+    scale = scale,
+    ox = new_ox,
+    oy = new_oy,
+  })
+end
+
+local function is_menu_screen(screen)
+  return screen == "title"
+    or screen == "stage_clear"
+    or screen == "game_over"
+    or screen == "victory"
+end
+
+local function hit_pause_rect(lx, ly)
+  return lx >= TOUCH_PAUSE_MIN_X and lx <= TOUCH_PAUSE_MAX_X
+    and ly >= TOUCH_PAUSE_MIN_Y and ly <= TOUCH_PAUSE_MAX_Y
+end
+
+local function release_touch_slot(self, pid, slot)
+  local t = self.touch
+  if t.tracked[pid] == nil then
+    return
+  end
+  t.tracked[pid] = nil
+  t.tracked_count = math.max(0, t.tracked_count - 1)
+
+  if slot.role == "move" and t.move_id == pid then
+    t.move_id = nil
+    if self.sim.screen == "play" then
+      handle_command(self, C.MSG_INPUT_MOVE, { dx = 0, dy = 0 })
+    end
+  elseif slot.role == "fire" and t.fire_id == pid then
+    t.fire_id = nil
+    if self.sim.screen == "play" then
+      handle_command(self, C.MSG_INPUT_FIRE_RELEASE, {})
+    end
+  end
+end
+
+local function process_touch_points(self, raw_points, is_real_gesture)
+  if self.photo_mode or self.bot_enabled or type(raw_points) ~= "table" then
+    return false
+  end
+  local t = self.touch
+
+  -- Activate touch HUD chrome on first real touch (and also allow test_touch to keep HUD informed)
+  if is_real_gesture and not t.activated and #raw_points > 0 then
+    t.activated = true
+    msg.post(self.hud_url, MSG_TOUCH_HINT, { controller_url = self.self_url })
+  end
+
+  -- Clean up ignored ids on release and filter out 3rd+ / previously cancelled fingers
+  local active_pts = {}
+  local seen_this_frame = {}
+  for i = 1, #raw_points do
+    local p = raw_points[i]
+    if type(p) == "table" then
+      local pid = tonumber(p.id) or i
+      local sx = tonumber(p.screen_x ~= nil and p.screen_x or p.x) or 0.0
+      local sy = tonumber(p.screen_y ~= nil and p.screen_y or p.y) or 0.0
+      local pressed = (p.pressed == true)
+      local released = (p.released == true)
+      seen_this_frame[pid] = true
+
+      if t.ignored_ids[pid] then
+        if released then
+          t.ignored_ids[pid] = nil
+        end
+      elseif t.tracked[pid] ~= nil then
+        active_pts[#active_pts + 1] = { id = pid, sx = sx, sy = sy, pressed = pressed, released = released }
+      elseif pressed then
+        if t.tracked_count < 2 then
+          local lx, ly = screen_to_logical(self, sx, sy)
+          t.tracked[pid] = {
+            id = pid,
+            role = "pending",
+            start_lx = lx,
+            start_ly = ly,
+            anchor_lx = lx,
+            anchor_ly = ly,
+            anchor_ship_x = self.sim.ship.x,
+            anchor_ship_y = self.sim.ship.y,
+            last_sx = sx,
+            last_sy = sy,
+            press_clock = self.audio_clock,
+          }
+          t.tracked_count = t.tracked_count + 1
+          active_pts[#active_pts + 1] = { id = pid, sx = sx, sy = sy, pressed = true, released = released }
+        else
+          -- Cap at 2 tracked fingers; ignore 3rd+ concurrent touch including for gesture recognition
+          if not released then
+            t.ignored_ids[pid] = true
+          end
+        end
+      end
+    end
+  end
+
+  -- Reconcile any tracked finger dropped without an explicit release in multi-touch snapshots
+  if #raw_points > 1 then
+    local stale = nil
+    for pid, slot in pairs(t.tracked) do
+      if not seen_this_frame[pid] then
+        stale = stale or {}
+        stale[#stale + 1] = { id = pid, slot = slot }
+      end
+    end
+    if stale ~= nil then
+      for i = 1, #stale do
+        release_touch_slot(self, stale[i].id, stale[i].slot)
+      end
+    end
+  end
+
+  if #active_pts == 0 then
+    return false
+  end
+
+  -- Menu screens (title / stage_clear / game_over / victory): any single tap confirms via input_start
+  if is_menu_screen(self.sim.screen) then
+    for i = 1, #active_pts do
+      local pt = active_pts[i]
+      if pt.pressed then
+        -- Consume the gesture and clear captures so it cannot also fire on the newly entered screen
+        for j = 1, #active_pts do
+          local op = active_pts[j]
+          t.tracked[op.id] = nil
+          if not op.released then
+            t.ignored_ids[op.id] = true
+          end
+        end
+        t.tracked_count = 0
+        handle_command(self, C.MSG_INPUT_START, {})
+        if not self.sim.test_mode then
+          sync_view(self)
+        end
+        return true
+      elseif pt.released then
+        local slot = t.tracked[pt.id]
+        if slot then
+          release_touch_slot(self, pt.id, slot)
+        end
+      end
+    end
+    return true
+  end
+
+  -- Check two-finger tap recognition on play / pause:
+  -- Arm when 2 tracked fingers pressed within TWO_FINGER_CHORD_MAX_S (same frame or near-simultaneous);
+  -- disarm if held > TWO_FINGER_TAP_MAX_S or moved > TWO_FINGER_TAP_SLOP_PX (so MOVE drag + FIRE hold never pauses);
+  -- trigger input_pause once when a tap completes cleanly.
+  local new_press_ids = {}
+  for i = 1, #active_pts do
+    if active_pts[i].pressed then
+      new_press_ids[#new_press_ids + 1] = active_pts[i].id
+    end
+  end
+
+  if #new_press_ids == 2 and t.tracked_count == 2 then
+    -- Simultaneous two-finger press triggers input_pause immediately once
+    for j = 1, #active_pts do
+      local op = active_pts[j]
+      t.tracked[op.id] = nil
+      if not op.released then
+        t.ignored_ids[op.id] = true
+      end
+    end
+    t.tracked_count = 0
+    t.two_finger = nil
+    handle_command(self, C.MSG_INPUT_PAUSE, {})
+    if not self.sim.test_mode then
+      sync_view(self)
+    end
+    return true
+  elseif #new_press_ids == 1 and t.tracked_count == 2 and t.two_finger == nil then
+    local new_id = new_press_ids[1]
+    local other_slot = nil
+    for pid, slot in pairs(t.tracked) do
+      if pid ~= new_id then
+        other_slot = slot
+        break
+      end
+    end
+    if other_slot ~= nil and (self.audio_clock - other_slot.press_clock) <= TWO_FINGER_CHORD_MAX_S then
+      local dx0 = math.abs((select(1, screen_to_logical(self, other_slot.last_sx, other_slot.last_sy))) - other_slot.start_lx)
+      local dy0 = math.abs((select(2, screen_to_logical(self, other_slot.last_sx, other_slot.last_sy))) - other_slot.start_ly)
+      if dx0 <= TWO_FINGER_TAP_SLOP_PX and dy0 <= TWO_FINGER_TAP_SLOP_PX then
+        t.two_finger = {
+          id1 = other_slot.id,
+          id2 = new_id,
+          start_clock = other_slot.press_clock,
+          rel1 = false,
+          rel2 = false,
+        }
+      end
+    end
+  end
+
+  if t.two_finger ~= nil then
+    local tf = t.two_finger
+    if (self.audio_clock - tf.start_clock) > TWO_FINGER_TAP_MAX_S then
+      t.two_finger = nil
+    else
+      for i = 1, #active_pts do
+        local pt = active_pts[i]
+        if pt.id == tf.id1 or pt.id == tf.id2 then
+          local slot = t.tracked[pt.id]
+          if slot ~= nil then
+            local lx, ly = screen_to_logical(self, pt.sx, pt.sy)
+            if math.abs(lx - slot.start_lx) > TWO_FINGER_TAP_SLOP_PX
+              or math.abs(ly - slot.start_ly) > TWO_FINGER_TAP_SLOP_PX
+            then
+              t.two_finger = nil
+              break
+            end
+          end
+          if pt.released then
+            if pt.id == tf.id1 then tf.rel1 = true end
+            if pt.id == tf.id2 then tf.rel2 = true end
+          end
+        end
+      end
+      -- Trigger two-finger tap pause either on same-frame simultaneous 2-finger press when both release
+      -- or immediately when both fingers of the short chord release cleanly (or same-frame tap).
+      if t.two_finger ~= nil and tf.rel1 and tf.rel2 then
+        t.two_finger = nil
+        handle_command(self, C.MSG_INPUT_PAUSE, {})
+        if not self.sim.test_mode then
+          sync_view(self)
+        end
+        return true
+      end
+    end
+  end
+
+  -- Process per-finger press / drag / release on play and pause
+  for i = 1, #active_pts do
+    local pt = active_pts[i]
+    local slot = t.tracked[pt.id]
+    if slot ~= nil then
+      slot.last_sx = pt.sx
+      slot.last_sy = pt.sy
+      local lx, ly = screen_to_logical(self, pt.sx, pt.sy)
+
+      if pt.pressed then
+        -- Top-right pause button hit-test priority over FORCE on both play and pause
+        if (self.sim.screen == "play" or self.sim.screen == "pause") and hit_pause_rect(lx, ly) then
+          slot.role = "pause_btn"
+          if not pt.released then
+            t.ignored_ids[pt.id] = true
+          end
+          t.tracked[pt.id] = nil
+          t.tracked_count = math.max(0, t.tracked_count - 1)
+          handle_command(self, C.MSG_INPUT_PAUSE, {})
+          if not self.sim.test_mode then
+            sync_view(self)
+          end
+          return true
+        elseif self.sim.screen == "play"
+          and lx >= TOUCH_PLAY_MIN_X and lx <= TOUCH_PLAY_MAX_X
+          and ly >= TOUCH_PLAY_MIN_Y and ly <= TOUCH_PLAY_MAX_Y
+        then
+          if lx < TOUCH_SPLIT_X then
+            if t.move_id == nil then
+              slot.role = "move"
+              slot.anchor_lx = lx
+              slot.anchor_ly = ly
+              slot.anchor_ship_x = self.sim.ship.x
+              slot.anchor_ship_y = self.sim.ship.y
+              t.move_id = pt.id
+            else
+              slot.role = "noop"
+            end
+          elseif ly < TOUCH_SPLIT_Y then
+            if t.fire_id == nil then
+              slot.role = "fire"
+              t.fire_id = pt.id
+              handle_command(self, C.MSG_INPUT_FIRE_PRESS, {})
+            else
+              slot.role = "noop"
+            end
+          else
+            slot.role = "force"
+            handle_command(self, C.MSG_INPUT_FORCE, {})
+          end
+        else
+          slot.role = "outside"
+        end
+      elseif not pt.released and slot.role == "move" and t.move_id == pt.id and self.sim.screen == "play" then
+        local target_x = slot.anchor_ship_x + (lx - slot.anchor_lx)
+        local target_y = slot.anchor_ship_y + (ly - slot.anchor_ly)
+        handle_command(self, C.MSG_INPUT_MOVE, {
+          dx = 0,
+          dy = 0,
+          drag_x = target_x,
+          drag_y = target_y,
+        })
+      end
+
+      if pt.released and t.tracked[pt.id] ~= nil then
+        -- Also apply final drag delta if a MOVE finger moved on its release frame
+        if not pt.pressed and slot.role == "move" and t.move_id == pt.id and self.sim.screen == "play" then
+          local dx_move = lx - slot.anchor_lx
+          local dy_move = ly - slot.anchor_ly
+          if math.abs(dx_move) > 1e-4 or math.abs(dy_move) > 1e-4 then
+            handle_command(self, C.MSG_INPUT_MOVE, {
+              dx = 0,
+              dy = 0,
+              drag_x = slot.anchor_ship_x + dx_move,
+              drag_y = slot.anchor_ship_y + dy_move,
+            })
+          end
+        end
+        release_touch_slot(self, pt.id, slot)
+      end
+    end
+  end
+
+  if not self.sim.test_mode then
+    sync_view(self)
+  end
+  return true
 end
 
 ---------------------------------------------------------------------------
@@ -569,6 +973,21 @@ function init(self)
     up = false, down = false, left = false, right = false,
     fire = false, force = false, start = false,
   }
+  self.viewport = {
+    scale = 3.0,
+    ox = 0.0,
+    oy = 0.0,
+  }
+  self.touch = {
+    activated = false,
+    tracked = {},
+    tracked_count = 0,
+    ignored_ids = {},
+    move_id = nil,
+    fire_id = nil,
+    two_finger = nil,
+  }
+  msg.post("@render:", MSG_REGISTER_VIEWPORT, { url = self.self_url })
 
   self.actor_pool = {}
   self.view = {
@@ -647,6 +1066,37 @@ function on_input(self, action_id, action)
   if self.photo_mode or action_id == nil then
     return false
   end
+  if action_id == ACTION_TOUCH then
+    if self.bot_enabled then
+      return false
+    end
+    local raw_pts = action.touch_points or action.touch
+    local pts = nil
+    if type(raw_pts) == "table" and #raw_pts > 0 then
+      pts = raw_pts
+      for i = 1, #pts do
+        if pts[i].pressed then
+          mixer_mod.unlock_real_gesture(self.mixer, self.audio_clock)
+          break
+        end
+      end
+    else
+      if action.pressed then
+        mixer_mod.unlock_real_gesture(self.mixer, self.audio_clock)
+      end
+      pts = {
+        {
+          id = 0,
+          x = action.screen_x ~= nil and action.screen_x or action.x,
+          y = action.screen_y ~= nil and action.screen_y or action.y,
+          pressed = (action.pressed == true),
+          released = (action.released == true),
+        },
+      }
+    end
+    return process_touch_points(self, pts, true)
+  end
+
   if action.pressed then
     mixer_mod.unlock_real_gesture(self.mixer, self.audio_clock)
   end
@@ -740,8 +1190,26 @@ function on_message(self, message_id, message, sender)
     return
   end
 
+  if message_id == C.MSG_VIEWPORT_MAP then
+    if message then
+      apply_viewport_map(self, tonumber(message.scale), message.ox, message.oy)
+    end
+    return
+  end
+
+  if message_id == C.MSG_TEST_TOUCH then
+    if self.sim.test_mode and message and type(message.points) == "table" then
+      process_touch_points(self, message.points, false)
+    end
+    return
+  end
+
   if message_id == C.MSG_TEST_MODE then
     local enabled = (message ~= nil and message.enabled == true)
+    reset_touch_captures(self)
+    if self.touch then
+      self.touch.ignored_ids = {}
+    end
     apply_test_mode(self, enabled, true)
     return
   end

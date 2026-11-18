@@ -1202,6 +1202,24 @@ function M.input_move(sim, dx, dy)
   retarget_ship_tweens(sim)
 end
 
+function M.input_drag_to(sim, target_x, target_y)
+  if sim.screen ~= "play" or not sim.ship.alive or sim.death_timer > 0.0 then
+    return
+  end
+  local nx = tonumber(target_x)
+  local ny = tonumber(target_y)
+  if nx == nil or ny == nil then
+    return
+  end
+  sim.move_dx = 0.0
+  sim.move_dy = 0.0
+  sim.ship.tw_x = nil
+  sim.ship.tw_y = nil
+  sim.ship.x = clamp(nx, M.SHIP_MIN_X, M.SHIP_MAX_X)
+  sim.ship.y = clamp(ny, M.SHIP_MIN_Y, M.SHIP_MAX_Y)
+  sync_attached_support(sim)
+end
+
 function M.input_fire_press(sim)
   if sim.screen ~= "play" or not sim.ship.alive or sim.death_timer > 0.0 then
     return

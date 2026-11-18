@@ -30,6 +30,8 @@ M.MSG_TEST_ADVANCE = hash("test_advance")
 M.MSG_TEST_MODE = hash("test_mode")
 M.MSG_TEST_SET_STAGE = hash("test_set_stage")
 M.MSG_TEST_SPAWN_REPORT = hash("test_spawn_report")
+M.MSG_TEST_TOUCH = hash("test_touch")
+M.MSG_VIEWPORT_MAP = hash("viewport_map")
 M.MSG_WAVE_CHARGE = hash("wave_charge")
 
 M.GROUP_BGM = hash("bgm")

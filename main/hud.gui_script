@@ -1,14 +1,27 @@
--- main/hud.gui_script -- Bottom y=0..24 HUD band and six-screen overlay controller
+-- main/hud.gui_script -- Bottom y=0..24 HUD band, six-screen overlay controller,
+-- and native touch-only chrome (zone hints + persistent top-right pause button)
 -- for Rift Vector. Strict Lua 5.1, GUI script context only (no go.* calls).
+-- British English (Oxford spelling).
 
 local C = require "main.constants"
 
 local MSG_HUD_SYNC = hash("hud_sync")
+local MSG_TOUCH_HINT = hash("touch_hint")
+local ACTION_TOUCH = hash("touch")
 
 local COLOR_TIER_0 = vmath.vector4(0.435, 0.765, 0.969, 1.0)
 local COLOR_TIER_1 = vmath.vector4(0.243, 0.431, 0.878, 1.0)
 local COLOR_TIER_2 = vmath.vector4(0.910, 0.816, 0.251, 1.0)
 local COLOR_TIER_3 = vmath.vector4(0.949, 0.627, 0.239, 1.0)
+
+-- Palette-locked touch chrome colours (#6FC3F7 hints at low alpha, #8A9099 button border,
+-- #0B0E1A button fill, #F2F2F2 pause bars)
+local COLOR_HINT_BORDER = vmath.vector4(0.435, 0.765, 0.969, 0.22)
+local COLOR_HINT_SPLIT = vmath.vector4(0.435, 0.765, 0.969, 0.28)
+local COLOR_HINT_LABEL = vmath.vector4(0.435, 0.765, 0.969, 0.55)
+local COLOR_PAUSE_BORDER = vmath.vector4(0.541, 0.565, 0.600, 0.88)
+local COLOR_PAUSE_INNER = vmath.vector4(0.043, 0.055, 0.102, 0.90)
+local COLOR_PAUSE_BAR = vmath.vector4(0.949, 0.949, 0.949, 0.95)
 
 local function clamp_score(val)
   local n = math.floor(tonumber(val) or 0)
@@ -40,10 +53,43 @@ local function update_readouts(self)
   end
 end
 
+local function update_touch_chrome_visibility(self)
+  if not self.touch_active then
+    gui.set_enabled(self.touch_hints_root, false)
+    gui.set_enabled(self.touch_pause_btn, false)
+    return
+  end
+  local show_pause = (self.screen == "play" or self.screen == "pause")
+  gui.set_enabled(self.touch_pause_btn, show_pause)
+  if not self.touch_hints_faded then
+    gui.set_enabled(self.touch_hints_root, self.screen == "play")
+  else
+    gui.set_enabled(self.touch_hints_root, false)
+  end
+end
+
+local function activate_touch_hints(self)
+  if self.touch_active then
+    update_touch_chrome_visibility(self)
+    return
+  end
+  self.touch_active = true
+  self.touch_hints_faded = false
+  gui.cancel_animations(self.touch_hints_root, "color.w")
+  gui.set_color(self.touch_hints_root, vmath.vector4(1.0, 1.0, 1.0, 1.0))
+  update_touch_chrome_visibility(self)
+  -- Hold zone hints for 4.0 s, then fade GUI alpha to 0 over 0.25 s once-forward linear.
+  gui.animate(self.touch_hints_root, "color.w", 0.0, gui.EASING_LINEAR, 0.25, 4.0, function(inst)
+    inst.touch_hints_faded = true
+    gui.set_enabled(inst.touch_hints_root, false)
+  end, gui.PLAYBACK_ONCE_FORWARD)
+end
+
 local function apply_screen_overlay(self, screen, prev_screen, immediate)
   self.screen = screen
   gui.cancel_animations(self.fade_curtain, "color.w")
   gui.cancel_animations(self.overlay_root, "color.w")
+  update_touch_chrome_visibility(self)
 
   if screen == "play" then
     gui.set_enabled(self.overlay_root, false)
@@ -89,7 +135,24 @@ local function apply_screen_overlay(self, screen, prev_screen, immediate)
   end
 end
 
+local function screen_to_logical(self, sx, sy)
+  local sc = self.vp_scale
+  if sc == nil or sc <= 1e-6 then
+    sc = 3.0
+  end
+  return (sx - self.vp_ox) / sc, (sy - self.vp_oy) / sc
+end
+
+local function hit_pause_button(self, sx, sy)
+  if sx == nil or sy == nil then
+    return false
+  end
+  local lx, ly = screen_to_logical(self, sx, sy)
+  return gui.pick_node(self.touch_pause_btn, lx, ly)
+end
+
 function init(self)
+  self.controller_url = msg.url("game#controller")
   self.score_node = gui.get_node("score_1p")
   self.hi_node = gui.get_node("hi_score")
   self.stage_node = gui.get_node("stage_label")
@@ -105,6 +168,37 @@ function init(self)
   self.overlay_sub = gui.get_node("overlay_sub")
   self.fade_curtain = gui.get_node("fade_curtain")
 
+  self.touch_hints_root = gui.get_node("touch_hints_root")
+  self.touch_pause_btn = gui.get_node("touch_pause_btn")
+
+  gui.set_color(self.touch_hints_root, vmath.vector4(1.0, 1.0, 1.0, 0.0))
+  gui.set_color(gui.get_node("touch_border_top"), COLOR_HINT_BORDER)
+  gui.set_color(gui.get_node("touch_border_bottom"), COLOR_HINT_BORDER)
+  gui.set_color(gui.get_node("touch_border_left"), COLOR_HINT_BORDER)
+  gui.set_color(gui.get_node("touch_border_right"), COLOR_HINT_BORDER)
+  gui.set_color(gui.get_node("touch_split_v"), COLOR_HINT_SPLIT)
+  gui.set_color(gui.get_node("touch_split_h"), COLOR_HINT_SPLIT)
+  gui.set_color(gui.get_node("touch_label_move"), COLOR_HINT_LABEL)
+  gui.set_color(gui.get_node("touch_label_fire"), COLOR_HINT_LABEL)
+  gui.set_color(gui.get_node("touch_label_force"), COLOR_HINT_LABEL)
+
+  gui.set_color(self.touch_pause_btn, COLOR_PAUSE_BORDER)
+  gui.set_color(gui.get_node("touch_pause_inner"), COLOR_PAUSE_INNER)
+  gui.set_color(gui.get_node("touch_pause_bar_l"), COLOR_PAUSE_BAR)
+  gui.set_color(gui.get_node("touch_pause_bar_r"), COLOR_PAUSE_BAR)
+
+  gui.set_enabled(self.touch_hints_root, false)
+  gui.set_enabled(self.touch_pause_btn, false)
+
+  self.touch_active = false
+  self.touch_hints_faded = false
+  self.pause_touch_id = nil
+  self.vp_scale = 3.0
+  self.vp_ox = 0.0
+  self.vp_oy = 0.0
+  self.photo_mode = (sys.get_config_string("rift.photo") ~= nil and sys.get_config_string("rift.photo") ~= "")
+  self.bot_mode = (sys.get_config_string("rift.bot") == "1")
+
   self.score = 0
   self.hi_score = 0
   self.lives = 3
@@ -113,12 +207,94 @@ function init(self)
   self.beam_fraction = 0.0
   self.screen = "title"
 
+  if not self.photo_mode and not self.bot_mode then
+    msg.post(".", "acquire_input_focus")
+  end
+
   update_readouts(self)
   apply_screen_overlay(self, "title", "title", true)
 end
 
+function on_input(self, action_id, action)
+  if self.photo_mode or self.bot_mode or not self.touch_active then
+    return false
+  end
+  if action_id ~= ACTION_TOUCH then
+    return false
+  end
+  if self.screen ~= "play" and self.screen ~= "pause" then
+    self.pause_touch_id = nil
+    return false
+  end
+
+  local pts = action.touch_points or action.touch
+  if type(pts) == "table" and #pts > 0 then
+    if self.pause_touch_id ~= nil then
+      local still_down = false
+      for i = 1, #pts do
+        local pt = pts[i]
+        if pt.id == self.pause_touch_id then
+          if pt.released then
+            self.pause_touch_id = nil
+            return true
+          end
+          still_down = true
+        end
+      end
+      if still_down and #pts == 1 then
+        return true
+      elseif not still_down then
+        self.pause_touch_id = nil
+      end
+    end
+    for i = 1, math.min(2, #pts) do
+      local pt = pts[i]
+      local px = pt.screen_x or pt.x
+      local py = pt.screen_y or pt.y
+      if pt.pressed and hit_pause_button(self, px, py) then
+        self.pause_touch_id = pt.id or 0
+        msg.post(self.controller_url, C.MSG_INPUT_PAUSE, {})
+        return true
+      end
+    end
+    return false
+  end
+
+  local sx = action.screen_x or action.x
+  local sy = action.screen_y or action.y
+  if self.pause_touch_id ~= nil then
+    if action.released then
+      self.pause_touch_id = nil
+    end
+    return true
+  end
+  if action.pressed and hit_pause_button(self, sx, sy) then
+    self.pause_touch_id = 0
+    msg.post(self.controller_url, C.MSG_INPUT_PAUSE, {})
+    return true
+  end
+  return false
+end
+
 function on_message(self, message_id, message, sender)
-  if message_id == MSG_HUD_SYNC and message then
+  if message_id == MSG_TOUCH_HINT then
+    if message and message.controller_url then
+      self.controller_url = message.controller_url
+    elseif sender then
+      self.controller_url = msg.url(sender.socket, sender.path, sender.fragment)
+    end
+    activate_touch_hints(self)
+  elseif message_id == C.MSG_VIEWPORT_MAP and message then
+    if type(message.scale) == "number" and message.scale > 0 then
+      self.vp_scale = message.scale
+    end
+    if type(message.ox) == "number" then
+      self.vp_ox = message.ox
+    end
+    if type(message.oy) == "number" then
+      self.vp_oy = message.oy
+    end
+  elseif message_id == MSG_HUD_SYNC and message then
     if message.test_mode ~= nil then self.test_mode = (message.test_mode == true) end
     if message.score ~= nil then self.score = message.score end
     if message.hi_score ~= nil then self.hi_score = message.hi_score end

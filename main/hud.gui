@@ -1,18 +1,3 @@
-script: "/main/hud.gui_script"
-fonts {
-  name: "hud"
-  font: "/main/hud.font"
-}
-textures {
-  name: "hud"
-  texture: "/main/hud.atlas"
-}
-background_color {
-  x: 0.0
-  y: 0.0
-  z: 0.0
-  w: 0.0
-}
 nodes {
   position {
     x: 160.0
@@ -462,6 +447,293 @@ nodes {
   pivot: PIVOT_CENTER
   inherit_alpha: true
   alpha: 0.0
+}
+nodes {
+  id: "touch_hints_root"
+  position {
+    x: 0
+    y: 0
+    z: 0
+    w: 1
+  }
+  size {
+    x: 0
+    y: 0
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_SW
+  inherit_alpha: true
+  enabled: false
+}
+nodes {
+  id: "touch_border_top"
+  position {
+    x: 160
+    y: 199.5
+    z: 0
+    w: 1
+  }
+  size {
+    x: 320
+    y: 1
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+}
+nodes {
+  id: "touch_border_bottom"
+  position {
+    x: 160
+    y: 24.5
+    z: 0
+    w: 1
+  }
+  size {
+    x: 320
+    y: 1
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+}
+nodes {
+  id: "touch_border_left"
+  position {
+    x: 0.5
+    y: 112
+    z: 0
+    w: 1
+  }
+  size {
+    x: 1
+    y: 176
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+}
+nodes {
+  id: "touch_border_right"
+  position {
+    x: 319.5
+    y: 112
+    z: 0
+    w: 1
+  }
+  size {
+    x: 1
+    y: 176
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+}
+nodes {
+  id: "touch_split_v"
+  position {
+    x: 192
+    y: 112
+    z: 0
+    w: 1
+  }
+  size {
+    x: 1
+    y: 176
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+}
+nodes {
+  id: "touch_split_h"
+  position {
+    x: 256
+    y: 112
+    z: 0
+    w: 1
+  }
+  size {
+    x: 128
+    y: 1
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+}
+nodes {
+  id: "touch_label_move"
+  position {
+    x: 96
+    y: 112
+    z: 0
+    w: 1
+  }
+  size {
+    x: 96
+    y: 10
+    z: 0
+    w: 1
+  }
+  text: "MOVE"
+  type: TYPE_TEXT
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+  font: "hud"
+}
+nodes {
+  id: "touch_label_fire"
+  position {
+    x: 256
+    y: 68
+    z: 0
+    w: 1
+  }
+  size {
+    x: 96
+    y: 10
+    z: 0
+    w: 1
+  }
+  text: "FIRE"
+  type: TYPE_TEXT
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+  font: "hud"
+}
+nodes {
+  id: "touch_label_force"
+  position {
+    x: 256
+    y: 156
+    z: 0
+    w: 1
+  }
+  size {
+    x: 96
+    y: 10
+    z: 0
+    w: 1
+  }
+  text: "FORCE"
+  type: TYPE_TEXT
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_hints_root"
+  font: "hud"
+}
+nodes {
+  id: "touch_pause_btn"
+  position {
+    x: 308
+    y: 190
+    z: 0
+    w: 1
+  }
+  size {
+    x: 16
+    y: 12
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  enabled: false
+}
+nodes {
+  id: "touch_pause_inner"
+  position {
+    x: 0
+    y: 0
+    z: 0
+    w: 1
+  }
+  size {
+    x: 14
+    y: 10
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_pause_btn"
+}
+nodes {
+  id: "touch_pause_bar_l"
+  position {
+    x: -2
+    y: 0
+    z: 0
+    w: 1
+  }
+  size {
+    x: 2
+    y: 6
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_pause_btn"
+}
+nodes {
+  id: "touch_pause_bar_r"
+  position {
+    x: 2
+    y: 0
+    z: 0
+    w: 1
+  }
+  size {
+    x: 2
+    y: 6
+    z: 0
+    w: 1
+  }
+  type: TYPE_BOX
+  pivot: PIVOT_CENTER
+  inherit_alpha: true
+  parent: "touch_pause_btn"
+}
+script: "/main/hud.gui_script"
+fonts {
+  name: "hud"
+  font: "/main/hud.font"
+}
+textures {
+  name: "hud"
+  texture: "/main/hud.atlas"
+}
+background_color {
+  x: 0.0
+  y: 0.0
+  z: 0.0
+  w: 0.0
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_DISABLED
