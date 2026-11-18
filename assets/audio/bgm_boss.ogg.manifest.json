@@ -1,0 +1,15 @@
+{
+  "assets": [
+    {
+      "cue_id": "bgm_boss",
+      "duration": 13.714285714285714,
+      "format": "OGG",
+      "kind": "bgm",
+      "path": "bgm_boss.ogg",
+      "sample_rate": 44100,
+      "subtype": "VORBIS",
+      "target_lufs": -16.0
+    }
+  ],
+  "schema": 1
+}

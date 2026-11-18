@@ -1,0 +1,535 @@
+{
+  "schema": 1,
+  "cues": [
+    {
+      "cue_id": "shot",
+      "path": "shot.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 11,
+      "shaping": {
+        "preset": "laser",
+        "varispeed_ratio": 1.0,
+        "pitch_semitones": 0.0,
+        "trim_s": 0.13,
+        "filter": {
+          "type": "highpass",
+          "cutoff_hz": 450,
+          "order": 4
+        },
+        "envelope": {
+          "transient_boost_gain": 0.5,
+          "transient_tau_s": 0.02,
+          "fade_out_s": 0.05
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "wave_fire",
+      "path": "wave_fire.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 23,
+      "shaping": {
+        "preset": "laser",
+        "varispeed_ratios": [0.5, 0.72],
+        "pitch_semitones": [-12.0, -5.69],
+        "layers": {
+          "stem_0.5x_gain": 0.6,
+          "stem_0.72x_gain": 0.4,
+          "sine_sweep_hz": [1800, 140],
+          "sweep_dur_s": 0.62,
+          "sweep_tau_s": 0.35,
+          "sweep_gain": 0.9,
+          "band_noise_hz": [900, 5000],
+          "noise_dur_s": 0.5,
+          "noise_tau_s": 0.12,
+          "noise_gain": 0.12
+        },
+        "filter": {
+          "type": "lowpass",
+          "cutoff_hz": 7000,
+          "order": 2
+        },
+        "envelope": {
+          "fade_out_s": 0.15
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "charge_rise",
+      "path": "charge_rise.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 37,
+      "shaping": {
+        "preset": "powerup",
+        "varispeed_ratio": 0.62,
+        "pitch_semitones": -8.28,
+        "time_stretch": 1.613,
+        "layers": {
+          "stem_gain": 0.55,
+          "expo_sweep_hz": [220, 1500],
+          "sweep_gain": 0.9,
+          "band_noise_hz": [2000, 7000],
+          "noise_gain": 0.05
+        },
+        "envelope": {
+          "crescendo": "0.25 + 0.75 * (t/T)^1.5",
+          "am_flutter_hz": [6, 28],
+          "am_depth": 0.35,
+          "fade_out_s": 0.04
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "enemy_hit",
+      "path": "enemy_hit.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 5,
+      "shaping": {
+        "preset": "hit",
+        "varispeed_ratio": 1.0,
+        "pitch_semitones": 0.0,
+        "trim_s": 0.05,
+        "filter": {
+          "type": "highpass",
+          "cutoff_hz": 800,
+          "order": 4
+        },
+        "layers": {
+          "tick_gain": 0.8,
+          "tick_tau_s": 0.012,
+          "knock_sweep_hz": [1500, 800],
+          "knock_dur_s": 0.075,
+          "knock_tau_s": 0.02,
+          "knock_gain": 0.9
+        },
+        "envelope": {
+          "drive_tanh": 1.8,
+          "fade_out_s": 0.015
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "explosion_small",
+      "path": "explosion_small.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 3,
+      "shaping": {
+        "preset": "explosion",
+        "varispeed_ratio": 1.7,
+        "pitch_semitones": 9.19,
+        "trim_s": 0.5,
+        "filter": {
+          "type": "highpass",
+          "cutoff_hz": 180,
+          "order": 4
+        },
+        "layers": {
+          "stem_gain": 1.0,
+          "stem_tau_s": 0.14,
+          "pop_sweep_hz": [320, 90],
+          "pop_dur_s": 0.12,
+          "pop_tau_s": 0.05,
+          "pop_gain": 0.6
+        },
+        "envelope": {
+          "drive_tanh": 1.8,
+          "fade_out_s": 0.08
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "explosion_big",
+      "path": "explosion_big.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 8,
+      "shaping": {
+        "preset": "explosion",
+        "varispeed_ratio": 0.62,
+        "pitch_semitones": -8.28,
+        "time_stretch": 1.613,
+        "filter": {
+          "type": "lowpass",
+          "cutoff_hz": 2200,
+          "order": 4
+        },
+        "layers": {
+          "stem_gain": 0.6,
+          "low_noise_lp_hz": 700,
+          "low_noise_gain": 0.9,
+          "sub_sweep_hz": [95, 32],
+          "sub_gain": 0.9
+        },
+        "envelope": {
+          "swell_attack_s": 0.12,
+          "decay_tau_s": 0.75,
+          "fade_out_s": 0.25
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "player_die",
+      "path": "player_die.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 12,
+      "shaping": {
+        "preset": "explosion",
+        "varispeed_ratio": 0.85,
+        "pitch_semitones": -2.81,
+        "time_stretch": 1.176,
+        "filter": {
+          "type": "lowpass",
+          "cutoff_hz": 3500,
+          "order": 4
+        },
+        "layers": {
+          "stem_gain": 0.9,
+          "fm_wail_fc_hz": 640,
+          "fm_ratio": 2.0,
+          "fm_index": 4.0,
+          "fm_sweep_ratio": [1.0, 0.12],
+          "fm_dur_s": 1.9,
+          "fm_tau_s": 0.8,
+          "fm_gain": 0.55,
+          "tail_band_hz": [150, 1800],
+          "tail_am_hz": 7.0,
+          "tail_dur_s": 2.0,
+          "tail_tau_s": 0.9,
+          "tail_gain": 0.35
+        },
+        "envelope": {
+          "fade_out_s": 0.4
+        },
+        "delays_s": {
+          "wail_offset_s": 0.05,
+          "tail_offset_s": 0.1
+        }
+      }
+    },
+    {
+      "cue_id": "pickup_crystal",
+      "path": "pickup_crystal.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 6,
+      "shaping": {
+        "preset": "pickup",
+        "varispeed_ratio": 1.3,
+        "pitch_semitones": 4.54,
+        "layers": {
+          "stem_gain": 0.25,
+          "bell_f0_hz": 1760,
+          "bell_partials_ratio_gain_tau": [
+            [1.0, 1.0, 0.28],
+            [2.0, 0.5, 0.2],
+            [2.76, 0.35, 0.14],
+            [5.4, 0.2, 0.07]
+          ],
+          "bell_dur_s": 0.7,
+          "bell_gain": 1.0
+        },
+        "envelope": {
+          "fade_out_s": 0.15
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "pickup_power",
+      "path": "pickup_power.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 41,
+      "shaping": {
+        "preset": "powerup",
+        "varispeed_ratio": 1.45,
+        "pitch_semitones": 6.44,
+        "time_stretch": 0.69,
+        "layers": {
+          "stem_gain": 0.5,
+          "chime_partials_hz_gain": [
+            [1320, 1.0],
+            [1980, 0.6],
+            [2640, 0.4]
+          ],
+          "chime_gain": 0.8
+        },
+        "envelope": {
+          "decay_tau_s": 0.11,
+          "fade_out_s": 0.05
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "force_attach",
+      "path": "force_attach.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 14,
+      "shaping": {
+        "preset": "select",
+        "varispeed_ratio": 1.9,
+        "pitch_semitones": 11.11,
+        "layers": {
+          "ring_mod_hz": 523,
+          "rm_gain": 0.9,
+          "click_hp_hz": 2500,
+          "click_dur_s": 0.02,
+          "click_tau_s": 0.004,
+          "ring_partials_hz_tau": [
+            [1190, 0.05],
+            [1730, 0.035],
+            [2610, 0.02]
+          ],
+          "ring_dur_s": 0.18,
+          "ring_gain": 0.9
+        },
+        "envelope": {
+          "drive_tanh": 1.6,
+          "fade_out_s": 0.05
+        },
+        "delay_s": 0.07
+      }
+    },
+    {
+      "cue_id": "force_launch",
+      "path": "force_launch.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 17,
+      "shaping": {
+        "preset": "jump",
+        "varispeed_ratio": 1.25,
+        "pitch_semitones": 3.86,
+        "layers": {
+          "stem_gain": 0.5,
+          "fm_flick_fc_hz": 300,
+          "fm_ratio": 1.0,
+          "fm_index": 5.0,
+          "fm_sweep_ratio": [1.0, 5.0],
+          "fm_dur_s": 0.22,
+          "fm_gain": 0.9,
+          "noise_edge_band_hz": [1500, 9000],
+          "edge_dur_s": 0.05,
+          "edge_tau_s": 0.012,
+          "edge_gain": 0.6
+        },
+        "envelope": {
+          "fade_out_s": 0.05
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "boss_alert",
+      "path": "boss_alert.wav",
+      "kind": "sfx",
+      "group": "sfx",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 9,
+      "shaping": {
+        "preset": "hit",
+        "varispeed_ratio": 0.28,
+        "pitch_semitones": -22.04,
+        "time_stretch": 3.571,
+        "filter": {
+          "type": "lowpass",
+          "cutoff_hz": 900,
+          "order": 4
+        },
+        "layers": {
+          "stem_gain": 0.8,
+          "thump_sweep_hz": [110, 42],
+          "thump_dur_s": 0.5,
+          "thump_tau_s": 0.22,
+          "thump_gain": 1.0,
+          "fm_tone_fc_hz": 88,
+          "fm_ratio": 1.5,
+          "fm_index": 3.0,
+          "fm_dur_s": 0.7,
+          "fm_tau_s": 0.35,
+          "fm_gain": 0.35
+        },
+        "envelope": {
+          "fade_out_s": 0.12
+        },
+        "delay_s": 0.26,
+        "repeat_gain": 0.8
+      }
+    },
+    {
+      "cue_id": "ui_select",
+      "path": "ui_select.wav",
+      "kind": "sfx",
+      "group": "ui",
+      "looping": false,
+      "bpm": null,
+      "loop_bars": null,
+      "seed": 2,
+      "shaping": {
+        "preset": "select",
+        "varispeed_ratio": 0.8,
+        "pitch_semitones": -3.86,
+        "time_stretch": 1.25,
+        "filter": {
+          "type": "lowpass",
+          "cutoff_hz": 2600,
+          "order": 2
+        },
+        "envelope": {
+          "attack_ramp_s": 0.008,
+          "decay_tau_s": 0.04,
+          "fade_out_s": 0.02
+        },
+        "delay_s": 0.0
+      }
+    },
+    {
+      "cue_id": "bgm_title",
+      "path": "bgm_title.ogg",
+      "kind": "bgm",
+      "group": "bgm",
+      "looping": true,
+      "bpm": 100,
+      "loop_bars": 8,
+      "seed": 101,
+      "shaping": null
+    },
+    {
+      "cue_id": "bgm_stage_a",
+      "path": "bgm_stage_a.ogg",
+      "kind": "bgm",
+      "group": "bgm",
+      "looping": true,
+      "bpm": 120,
+      "loop_bars": 16,
+      "seed": 202,
+      "shaping": null
+    },
+    {
+      "cue_id": "bgm_stage_b",
+      "path": "bgm_stage_b.ogg",
+      "kind": "bgm",
+      "group": "bgm",
+      "looping": true,
+      "bpm": 132,
+      "loop_bars": 16,
+      "seed": 303,
+      "shaping": null
+    },
+    {
+      "cue_id": "bgm_stage_c",
+      "path": "bgm_stage_c.ogg",
+      "kind": "bgm",
+      "group": "bgm",
+      "looping": true,
+      "bpm": 126,
+      "loop_bars": 16,
+      "seed": 404,
+      "shaping": null
+    },
+    {
+      "cue_id": "bgm_boss",
+      "path": "bgm_boss.ogg",
+      "kind": "bgm",
+      "group": "bgm",
+      "looping": true,
+      "bpm": 140,
+      "loop_bars": 8,
+      "seed": 505,
+      "shaping": null
+    },
+    {
+      "cue_id": "bgm_final_boss",
+      "path": "bgm_final_boss.ogg",
+      "kind": "bgm",
+      "group": "bgm",
+      "looping": true,
+      "bpm": 148,
+      "loop_bars": 8,
+      "seed": 606,
+      "shaping": null
+    },
+    {
+      "cue_id": "jingle_stage_clear",
+      "path": "jingle_stage_clear.wav",
+      "kind": "jingle",
+      "group": "ui",
+      "looping": false,
+      "bpm": 120,
+      "loop_bars": 2,
+      "seed": 707,
+      "shaping": null
+    },
+    {
+      "cue_id": "jingle_game_over",
+      "path": "jingle_game_over.wav",
+      "kind": "jingle",
+      "group": "ui",
+      "looping": false,
+      "bpm": 90,
+      "loop_bars": 2,
+      "seed": 808,
+      "shaping": null
+    },
+    {
+      "cue_id": "jingle_victory",
+      "path": "jingle_victory.wav",
+      "kind": "jingle",
+      "group": "ui",
+      "looping": false,
+      "bpm": 110,
+      "loop_bars": 4,
+      "seed": 909,
+      "shaping": null
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "assets": [
+    {
+      "cue_id": "player_die",
+      "duration": 2.011859410430839,
+      "format": "WAV",
+      "kind": "sfx",
+      "path": "player_die.wav",
+      "sample_rate": 44100,
+      "subtype": "PCM_16",
+      "target_lufs": -14.0
+    }
+  ],
+  "schema": 1
+}
