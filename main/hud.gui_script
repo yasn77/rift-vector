@@ -85,6 +85,22 @@ local function activate_touch_hints(self)
   end, gui.PLAYBACK_ONCE_FORWARD)
 end
 
+local function update_overlay_subtext(self)
+  local screen = self.screen
+  if screen == "title" then
+    gui.set_text(self.overlay_sub, self.touch and "RV-7 LANCE  -  TAP TO LAUNCH" or "RV-7 LANCE  -  PRESS ENTER")
+  elseif screen == "pause" then
+    gui.set_text(self.overlay_sub, self.touch and "TAP PAUSE BUTTON OR TWO FINGERS TO RESUME" or "PRESS P TO RESUME")
+  elseif screen == "stage_clear" then
+    gui.set_text(self.overlay_sub, self.touch and "TAP FOR NEXT STAGE" or "PRESS ENTER FOR NEXT STAGE")
+  elseif screen == "game_over" then
+    gui.set_text(self.overlay_sub, self.touch and "TAP TO CONTINUE" or "PRESS ENTER TO CONTINUE")
+  elseif screen == "victory" then
+    local fmt = self.touch and "FINAL %09d - TAP FOR TITLE" or "FINAL %09d - PRESS ENTER"
+    gui.set_text(self.overlay_sub, string.format(fmt, clamp_score(self.score)))
+  end
+end
+
 local function apply_screen_overlay(self, screen, prev_screen, immediate)
   self.screen = screen
   gui.cancel_animations(self.fade_curtain, "color.w")
@@ -111,20 +127,16 @@ local function apply_screen_overlay(self, screen, prev_screen, immediate)
   gui.set_enabled(self.overlay_root, true)
   if screen == "title" then
     gui.set_text(self.overlay_title, "RIFT VECTOR")
-    gui.set_text(self.overlay_sub, "RV-7 LANCE  -  PRESS ENTER")
   elseif screen == "pause" then
     gui.set_text(self.overlay_title, "PAUSED")
-    gui.set_text(self.overlay_sub, "PRESS P TO RESUME")
   elseif screen == "stage_clear" then
     gui.set_text(self.overlay_title, string.format("STAGE %02d CLEAR", self.stage))
-    gui.set_text(self.overlay_sub, "PRESS ENTER FOR NEXT STAGE")
   elseif screen == "game_over" then
     gui.set_text(self.overlay_title, "GAME OVER")
-    gui.set_text(self.overlay_sub, "PRESS ENTER TO CONTINUE")
   elseif screen == "victory" then
     gui.set_text(self.overlay_title, "VICTORY - OVERMIND DEFEATED")
-    gui.set_text(self.overlay_sub, string.format("FINAL %09d - PRESS ENTER", clamp_score(self.score)))
   end
+  update_overlay_subtext(self)
 
   -- Initial title, pause and test_mode apply immediately; runtime transitions fade over 0.25 s linear.
   if immediate or screen == "pause" or self.test_mode then
@@ -190,6 +202,7 @@ function init(self)
   gui.set_enabled(self.touch_hints_root, false)
   gui.set_enabled(self.touch_pause_btn, false)
 
+  self.touch = false
   self.touch_active = false
   self.touch_hints_faded = false
   self.pause_touch_id = nil
@@ -283,7 +296,11 @@ function on_message(self, message_id, message, sender)
     elseif sender then
       self.controller_url = msg.url(sender.socket, sender.path, sender.fragment)
     end
+    self.touch = true
     activate_touch_hints(self)
+    if self.screen ~= "play" then
+      update_overlay_subtext(self)
+    end
   elseif message_id == C.MSG_VIEWPORT_MAP and message then
     if type(message.scale) == "number" and message.scale > 0 then
       self.vp_scale = message.scale
@@ -295,7 +312,9 @@ function on_message(self, message_id, message, sender)
       self.vp_oy = message.oy
     end
   elseif message_id == MSG_HUD_SYNC and message then
+    local prev_touch = self.touch
     if message.test_mode ~= nil then self.test_mode = (message.test_mode == true) end
+    if message.touch ~= nil then self.touch = (message.touch == true) end
     if message.score ~= nil then self.score = message.score end
     if message.hi_score ~= nil then self.hi_score = message.hi_score end
     if message.lives ~= nil then self.lives = message.lives end
@@ -303,8 +322,8 @@ function on_message(self, message_id, message, sender)
     update_readouts(self)
     if message.screen ~= nil and message.screen ~= self.screen then
       apply_screen_overlay(self, message.screen, self.screen)
-    elseif self.screen == "victory" then
-      gui.set_text(self.overlay_sub, string.format("FINAL %09d - PRESS ENTER", clamp_score(self.score)))
+    elseif self.screen ~= "play" and (self.touch or self.touch ~= prev_touch or self.screen == "victory") then
+      update_overlay_subtext(self)
     end
   elseif message_id == C.MSG_WAVE_CHARGE and message then
     self.beam_tier = message.tier or 0

@@ -467,17 +467,20 @@ local function flush_sim(self)
     end
   end
 
+  local touch_active = (self.touch ~= nil and self.touch.activated == true)
   if sim.score ~= self.hud_cache.score
     or sim.hi_score ~= self.hud_cache.hi_score
     or sim.lives ~= self.hud_cache.lives
     or sim.stage ~= self.hud_cache.stage
     or sim.screen ~= self.hud_cache.screen
+    or touch_active ~= self.hud_cache.touch
   then
     self.hud_cache.score = sim.score
     self.hud_cache.hi_score = sim.hi_score
     self.hud_cache.lives = sim.lives
     self.hud_cache.stage = sim.stage
     self.hud_cache.screen = sim.screen
+    self.hud_cache.touch = touch_active
     msg.post(self.hud_url, MSG_HUD_SYNC, {
       score = sim.score,
       hi_score = sim.hi_score,
@@ -485,6 +488,7 @@ local function flush_sim(self)
       stage = sim.stage,
       screen = sim.screen,
       test_mode = sim.test_mode,
+      touch = touch_active,
     })
   end
 end
@@ -653,6 +657,7 @@ local function process_touch_points(self, raw_points, is_real_gesture)
   if is_real_gesture and not t.activated and #raw_points > 0 then
     t.activated = true
     msg.post(self.hud_url, MSG_TOUCH_HINT, { controller_url = self.self_url })
+    flush_sim(self)
   end
 
   -- Clean up ignored ids on release and filter out 3rd+ / previously cancelled fingers
@@ -962,7 +967,7 @@ function init(self)
 
   local initial_hi = load_disk_hi_score()
   self.sim = sim_mod.new(initial_hi)
-  self.hud_cache = { score = -1, hi_score = -1, lives = -1, stage = -1, screen = "" }
+  self.hud_cache = { score = -1, hi_score = -1, lives = -1, stage = -1, screen = "", touch = nil }
   self.built_tilemap_stage = -1
 
   self.kb = {
