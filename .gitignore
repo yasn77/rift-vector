@@ -1,3 +1,9 @@
 /.deps
 /build
 /.internal
+
+# internal orchestration / build reports (never publish)
+IMPLEMENTATION_PLAN.md
+build-report.json
+build-report_time.json
+excluded_build-report.json
