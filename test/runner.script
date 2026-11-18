@@ -19,8 +19,9 @@ local t_05 = require "test.t_05_economy_death_score"
 local t_06 = require "test.t_06_stages_and_ramp"
 local t_07 = require "test.t_07_bosses_all_ten"
 local t_08 = require "test.t_08_hud_pause_screens"
+local t_09 = require "test.t_09_touch_controls"
 
-local MODULES = { t_01, t_02, t_03, t_04, t_05, t_06, t_07, t_08 }
+local MODULES = { t_01, t_02, t_03, t_04, t_05, t_06, t_07, t_08, t_09 }
 
 local function encode_test_json(fields)
   local parts = {}

@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Rift Vector — 16-Bit Strategic Horizontal Shoot-'Em-Up</title>
-	<meta name="description" content="Rift Vector: an original homage to the 1987 classic that defined the strategic shmup. Ten stages, ten biomechanical bosses, Force pod tactics, and chargeable Wave Cannon. Play in your browser or on Linux.">
+	<meta name="description" content="Rift Vector: an original homage to the 1987 classic that defined the strategic shmup. Ten stages, ten biomechanical bosses, Force pod tactics, and chargeable Wave Cannon. Play in your browser on desktop or mobile touch, or natively on Linux.">
 	<meta name="theme-color" content="#000000">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -418,6 +418,14 @@
 			font-size: 0.9rem;
 		}
 
+		.play-notes {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			flex: 1 1 440px;
+			min-width: 0;
+		}
+
 		.play-note {
 			margin: 0;
 			color: var(--text);
@@ -425,6 +433,10 @@
 
 		.play-note strong {
 			color: var(--orange);
+		}
+
+		.play-note-touch strong {
+			color: var(--blue);
 		}
 
 		.new-tab-link {
@@ -479,7 +491,8 @@
 			border-bottom: none;
 		}
 
-		kbd {
+		kbd,
+		.touch-zone {
 			display: inline-block;
 			padding: 2px 7px;
 			font-family: var(--font-mono);
@@ -490,6 +503,17 @@
 			border: 1px solid var(--border);
 			box-shadow: inset 0 -1px 0 var(--shadow-inner);
 			white-space: nowrap;
+		}
+
+		.touch-zone {
+			color: var(--blue);
+		}
+
+		.controls-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 24px;
+			align-items: start;
 		}
 
 		.num-col {
@@ -717,6 +741,10 @@
 
 		/* Responsive single-column layout on mobile/tablet */
 		@media (max-width: 920px) {
+			.controls-grid {
+				grid-template-columns: 1fr;
+			}
+
 			.arsenal-grid {
 				grid-template-columns: repeat(2, minmax(0, 1fr));
 			}
@@ -748,6 +776,10 @@
 				flex-direction: column;
 				align-items: flex-start;
 			}
+
+			.play-notes {
+				flex: 0 1 auto;
+			}
 		}
 	</style>
 </head>
@@ -777,7 +809,7 @@
 				<ul class="badge-row" aria-label="Key features">
 					<li class="badge">10 STAGES</li>
 					<li class="badge">10 BOSSES</li>
-					<li class="badge">LINUX + WEB</li>
+					<li class="badge">LINUX + WEB + TOUCH</li>
 					<li class="badge">SCORE ATTACK</li>
 				</ul>
 				<div class="cta-row">
@@ -814,7 +846,10 @@
 						></iframe>
 					</div>
 					<div class="play-meta">
-						<p class="play-note"><strong>PILOT BRIEF:</strong> Click inside the game, then press <kbd>ENTER</kbd> to launch. Audio unlocks on your first key press. Fullscreen recommended.</p>
+						<div class="play-notes">
+							<p class="play-note"><strong>PILOT BRIEF:</strong> Click inside the game, then press <kbd>ENTER</kbd> to launch. Audio unlocks on your first key press. Fullscreen recommended.</p>
+							<p class="play-note play-note-touch"><strong>ON PHONES:</strong> Rotate to landscape for the best view; tap inside the game once to focus, then tap to launch; audio unlocks on first touch.</p>
+						</div>
 						<a class="new-tab-link" href="game.html" target="_blank" rel="noopener">Open game in a new tab ↗</a>
 					</div>
 				</div>
@@ -824,42 +859,84 @@
 			<section id="controls" aria-labelledby="heading-controls">
 				<h2 id="heading-controls">CONTROLS</h2>
 				<div class="metal-panel">
-					<div class="table-scroll">
-						<table>
-							<thead>
-								<tr>
-									<th scope="col">Input</th>
-									<th scope="col">Action</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td><kbd>Arrows</kbd> / <kbd>WASD</kbd></td>
-									<td>Move your starfighter</td>
-								</tr>
-								<tr>
-									<td><kbd>Z</kbd> or <kbd>Space</kbd> (tap)</td>
-									<td>Fire rapid vulcan burst</td>
-								</tr>
-								<tr>
-									<td><kbd>Z</kbd> or <kbd>Space</kbd> (hold ≥0.3 s, then release)</td>
-									<td>Charge &amp; fire Wave Cannon — tiers at <strong>0.6 / 1.1 / 1.8 s</strong>; watch the <strong>BEAM</strong> gauge</td>
-								</tr>
-								<tr>
-									<td><kbd>X</kbd> or <kbd>Left Shift</kbd></td>
-									<td>Launch / recall the Force pod</td>
-								</tr>
-								<tr>
-									<td><kbd>Enter</kbd></td>
-									<td>Start / continue / next stage</td>
-								</tr>
-								<tr>
-									<td><kbd>P</kbd></td>
-									<td>Pause</td>
-								</tr>
-							</tbody>
-						</table>
+					<div class="controls-grid">
+						<div>
+							<h3 id="controls-keyboard">KEYBOARD (DESKTOP)</h3>
+							<div class="table-scroll">
+								<table aria-labelledby="controls-keyboard">
+									<thead>
+										<tr>
+											<th scope="col">Input</th>
+											<th scope="col">Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td><kbd>Arrows</kbd> / <kbd>WASD</kbd></td>
+											<td>Move your starfighter</td>
+										</tr>
+										<tr>
+											<td><kbd>Z</kbd> or <kbd>Space</kbd> (tap)</td>
+											<td>Fire rapid vulcan burst</td>
+										</tr>
+										<tr>
+											<td><kbd>Z</kbd> or <kbd>Space</kbd> (hold ≥0.3 s, then release)</td>
+											<td>Charge &amp; fire Wave Cannon — tiers at <strong>0.6 / 1.1 / 1.8 s</strong>; watch the <strong>BEAM</strong> gauge</td>
+										</tr>
+										<tr>
+											<td><kbd>X</kbd> or <kbd>Left Shift</kbd></td>
+											<td>Launch / recall the Force pod</td>
+										</tr>
+										<tr>
+											<td><kbd>Enter</kbd></td>
+											<td>Start / continue / next stage</td>
+										</tr>
+										<tr>
+											<td><kbd>P</kbd></td>
+											<td>Pause</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						<div>
+							<h3 id="controls-touch">TOUCH (MOBILE)</h3>
+							<div class="table-scroll">
+								<table aria-labelledby="controls-touch">
+									<thead>
+										<tr>
+											<th scope="col">Zone / Gesture</th>
+											<th scope="col">Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td><span class="touch-zone">Left 60%</span> (drag)</td>
+											<td>Drag to move your starfighter (1:1)</td>
+										</tr>
+										<tr>
+											<td><span class="touch-zone">Right-lower</span> (hold &amp; release)</td>
+											<td>Hold to fire / charge the Wave Cannon; release to fire</td>
+										</tr>
+										<tr>
+											<td><span class="touch-zone">Right-upper</span> (tap)</td>
+											<td>Tap for the Force pod (launch / recall)</td>
+										</tr>
+										<tr>
+											<td><span class="touch-zone">Any tap</span> (menus)</td>
+											<td>Confirm menus (start / continue / next stage)</td>
+										</tr>
+										<tr>
+											<td><span class="touch-zone">Top-right</span> / <span class="touch-zone">2-finger tap</span></td>
+											<td>Tap the top-right pause button or two-finger tap to pause</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
 					</div>
+					<p class="callout"><strong>TOUCH ACTIVATION:</strong> Zone hints appear on first touch. Keyboard controls still work on desktop; touch activates on the first real tap.</p>
 				</div>
 			</section>
 
@@ -1183,7 +1260,7 @@
 				<div class="metal-panel about-grid">
 					<div class="about-prose">
 						<p><strong>Rift Vector</strong> is an original IP inspired by <strong>R-Type</strong> (Irem, 1987) — no Irem artwork, audio, names, or code are used.</p>
-						<p>Built with <strong>Defold 1.14.1</strong> through a deterministic asset and verification pipeline: <strong>48 palette-locked sprite clips</strong>, <strong>22 mastered FM/PSG audio cues</strong>, a <strong>50-check blind behavioural test suite</strong>, and a native Linux build shipping <strong>Vulkan + OpenGL shader parity</strong>.</p>
+						<p>Built with <strong>Defold 1.14.1</strong> through a deterministic asset and verification pipeline: <strong>48 palette-locked sprite clips</strong>, <strong>22 mastered FM/PSG audio cues</strong>, a <strong>50-check blind behavioural test suite</strong>, <strong>WebAssembly + mobile touch controls</strong>, and a native Linux build shipping <strong>Vulkan + OpenGL shader parity</strong>.</p>
 						<p>Released under the <strong>MIT licence</strong>.</p>
 					</div>
 					<ul class="about-links">
