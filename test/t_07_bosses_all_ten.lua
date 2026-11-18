@@ -21,7 +21,7 @@ local function ensure_at_boss_unpowered(label)
   return r
 end
 
-local function verify_boss_contract(st)
+local function verify_boss_contract(st, assert_contract)
   local label = "Stage " .. tostring(st.stage) .. " " .. st.boss_name
   local r0 = H.start_play(st.stage, label)
   assert_contract(r0.force.level == 0, label .. ": test starts unpowered (Force level 0)")
@@ -206,7 +206,7 @@ return function()
           st.expose_s
         ),
         function()
-          verify_boss_contract(st)
+          verify_boss_contract(st, assert_contract)
         end
       )
     end

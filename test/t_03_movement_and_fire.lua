@@ -376,19 +376,35 @@ return function()
 
       for i = 1, #tiers do
         local spec = tiers[i]
-        -- Wait until boss is closed so press-edge vulcan cannot add +1 damage
+        -- Synchronise to the open -> closed falling edge of Ribmaw's 6.0 s cycle
+        -- (2.50 s open, 3.50 s closed), then pre-advance (3.50 s - spec.hold) into
+        -- the closed phase before pressing fire so the press-edge vulcan strikes
+        -- closed armour for 0 damage and release lands inside spec.tier once exposed.
+        r = H.advance_until(function(rep)
+          return rep.boss ~= nil and rep.boss.exposed == true
+        end, H.secs(6.5), 2, "sync open before tier " .. tostring(spec.tier))
+        assert_contract(r ~= nil and r.boss ~= nil, "Ribmaw weak point must open during 6 s cycle")
         r = H.advance_until(function(rep)
           return rep.boss ~= nil and rep.boss.exposed == false
-        end, H.secs(6.5), 3, "wait closed before tier " .. tostring(spec.tier))
+        end, H.secs(3.5), 1, "wait closed before tier " .. tostring(spec.tier))
         assert_contract(r ~= nil and r.boss ~= nil, "Ribmaw must be active with closed phases")
+        local pre_closed = H.secs(3.50) - spec.hold - 1
+        if pre_closed > 0 then
+          r = H.advance(pre_closed, "pre-advance closed window before tier " .. tostring(spec.tier))
+        end
         local hp_before = r.boss.hp
 
         H.post("input_fire_press", {})
-        H.advance(spec.hold, "charge tier " .. tostring(spec.tier))
-        r = H.advance_until(function(rep)
-          return rep.boss ~= nil and rep.boss.exposed == true
-        end, H.secs(6.5), 2, "wait exposed for tier " .. tostring(spec.tier))
-        assert_contract(r ~= nil and r.boss ~= nil, "Ribmaw weak point must open during 6 s cycle")
+        r = H.advance(spec.hold, "charge tier " .. tostring(spec.tier))
+        if not (r.boss and r.boss.exposed == true) then
+          r = H.advance_until(function(rep)
+            return rep.boss ~= nil and rep.boss.exposed == true
+          end, H.secs(0.45), 1, "wait exposed for tier " .. tostring(spec.tier))
+        end
+        assert_contract(
+          r ~= nil and r.boss ~= nil and r.boss.exposed == true,
+          "Ribmaw weak point must open during 6 s cycle"
+        )
 
         local mark_rel = H.mark_events()
         H.post("input_fire_release", {})
