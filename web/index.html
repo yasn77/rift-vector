@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Rift Vector — 16-Bit Strategic Horizontal Shoot-'Em-Up</title>
+	<meta name="description" content="Rift Vector: an original homage to the 1987 classic that defined the strategic shmup. Ten stages, ten biomechanical bosses, Force pod tactics, and chargeable Wave Cannon. Play in your browser or on Linux.">
+	<meta name="theme-color" content="#000000">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg: #000000;
+			--panel: #0B0E1A;
+			--panel-alt: #101526;
+			--border: #8A9099;
+			--shadow-inner: #4C525B;
+			--text: #F2F2F2;
+			--text-muted: #B6BEC8;
+			--text-dim: #8A9099;
+			--orange: #F2A03D;
+			--blue: #6FC3F7;
+			--red: #E04838;
+			--yellow: #E8D040;
+			--green: #3FA34D;
+			--font-display: "Press Start 2P", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+			--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+			--star-y-near: 0px;
+			--star-y-far: 0px;
+		}
+
+		*, *::before, *::after {
+			box-sizing: border-box;
+		}
+
+		html {
+			background-color: var(--bg);
+			color: var(--text);
+			scroll-behavior: smooth;
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			html {
+				scroll-behavior: auto;
+			}
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			min-height: 100vh;
+			background-color: var(--bg);
+			color: var(--text);
+			font-family: var(--font-mono);
+			font-size: 15px;
+			line-height: 1.65;
+			position: relative;
+			overflow-x: hidden;
+		}
+
+		/* Layered CSS starfield (#6FC3F7 & #F2F2F2 dots on #000000) */
+		body::before {
+			content: "";
+			position: fixed;
+			inset: 0;
+			z-index: 0;
+			pointer-events: none;
+			background-color: #000000;
+			background-image:
+				radial-gradient(1px 1px at 24px 36px, #F2F2F2 99%, transparent),
+				radial-gradient(1.5px 1.5px at 92px 118px, #6FC3F7 99%, transparent),
+				radial-gradient(1px 1px at 164px 54px, #F2F2F2 99%, transparent),
+				radial-gradient(1px 1px at 238px 186px, #6FC3F7 99%, transparent),
+				radial-gradient(1.5px 1.5px at 310px 88px, #F2F2F2 99%, transparent),
+				radial-gradient(1px 1px at 56px 228px, #6FC3F7 99%, transparent),
+				radial-gradient(1px 1px at 188px 256px, #F2F2F2 99%, transparent),
+				radial-gradient(1.5px 1.5px at 284px 294px, #6FC3F7 99%, transparent),
+				radial-gradient(1px 1px at 134px 16px, #6FC3F7 99%, transparent),
+				radial-gradient(1px 1px at 342px 212px, #F2F2F2 99%, transparent);
+			background-size:
+				360px 320px,
+				360px 320px,
+				360px 320px,
+				360px 320px,
+				360px 320px,
+				480px 420px,
+				480px 420px,
+				480px 420px,
+				480px 420px,
+				480px 420px;
+			background-position:
+				0 var(--star-y-near),
+				0 var(--star-y-near),
+				0 var(--star-y-near),
+				0 var(--star-y-near),
+				0 var(--star-y-near),
+				0 var(--star-y-far),
+				0 var(--star-y-far),
+				0 var(--star-y-far),
+				0 var(--star-y-far),
+				0 var(--star-y-far);
+			opacity: 0.85;
+		}
+
+		/* Subtle CRT scanline overlay */
+		body::after {
+			content: "";
+			position: fixed;
+			inset: 0;
+			z-index: 40;
+			pointer-events: none;
+			background: repeating-linear-gradient(
+				to bottom,
+				rgba(255, 255, 255, 0) 0px,
+				rgba(255, 255, 255, 0) 2px,
+				rgba(0, 0, 0, 0.22) 3px,
+				rgba(0, 0, 0, 0.22) 4px
+			);
+		}
+
+		.page-shell {
+			position: relative;
+			z-index: 1;
+			max-width: 1120px;
+			margin: 0 auto;
+			padding: 0 20px 64px;
+		}
+
+		.skip-link {
+			position: absolute;
+			left: -9999px;
+			top: 8px;
+			background: var(--orange);
+			color: #000000;
+			padding: 8px 14px;
+			font-weight: 700;
+			z-index: 100;
+			text-decoration: none;
+		}
+
+		.skip-link:focus {
+			left: 16px;
+		}
+
+		/* Top navigation strip */
+		.top-nav {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 16px 0;
+			border-bottom: 1px solid var(--shadow-inner);
+			margin-bottom: 28px;
+		}
+
+		.top-nav-brand {
+			font-family: var(--font-display);
+			font-size: 0.8rem;
+			color: var(--orange);
+			text-decoration: none;
+			letter-spacing: 0.06em;
+		}
+
+		.top-nav-links {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 14px 18px;
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			font-size: 0.85rem;
+		}
+
+		.top-nav-links a {
+			color: var(--text-muted);
+			text-decoration: none;
+			transition: color 0.15s ease;
+		}
+
+		.top-nav-links a:hover,
+		.top-nav-links a:focus-visible {
+			color: var(--blue);
+			text-decoration: underline;
+		}
+
+		/* Riveted Amiga metal panels & frames */
+		.metal-panel,
+		.metal-frame {
+			background-color: var(--panel);
+			border: 2px solid var(--border);
+			box-shadow:
+				inset 0 0 0 2px var(--shadow-inner),
+				0 10px 28px rgba(0, 0, 0, 0.8);
+			background-image:
+				radial-gradient(circle at 9px 9px, #8A9099 0, #8A9099 2px, #4C525B 2.6px, transparent 3.2px),
+				radial-gradient(circle at calc(100% - 9px) 9px, #8A9099 0, #8A9099 2px, #4C525B 2.6px, transparent 3.2px),
+				radial-gradient(circle at 9px calc(100% - 9px), #8A9099 0, #8A9099 2px, #4C525B 2.6px, transparent 3.2px),
+				radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), #8A9099 0, #8A9099 2px, #4C525B 2.6px, transparent 3.2px);
+		}
+
+		.metal-panel {
+			padding: 24px;
+		}
+
+		.metal-frame {
+			padding: 12px;
+		}
+
+		/* Headings */
+		h1, h2, h3 {
+			font-family: var(--font-display);
+			color: #FFFFFF;
+			text-shadow: 2px 2px 0 rgba(242, 160, 61, 0.42);
+			margin-top: 0;
+			line-height: 1.4;
+			letter-spacing: 0.04em;
+		}
+
+		h1 {
+			font-size: clamp(1.6rem, 3.6vw, 2.55rem);
+			margin-bottom: 16px;
+			text-shadow: 3px 3px 0 rgba(242, 160, 61, 0.5);
+		}
+
+		h2 {
+			font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+			margin-bottom: 18px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		h2::before {
+			content: "";
+			display: inline-block;
+			width: 10px;
+			height: 18px;
+			background-color: var(--orange);
+			box-shadow: 3px 0 0 var(--shadow-inner);
+			flex-shrink: 0;
+		}
+
+		h3 {
+			font-size: 0.85rem;
+			margin-bottom: 10px;
+		}
+
+		section {
+			margin-bottom: 44px;
+			scroll-margin-top: 20px;
+		}
+
+		a {
+			color: var(--blue);
+		}
+
+		a:hover,
+		a:focus-visible {
+			color: #FFFFFF;
+		}
+
+		/* 1. Hero */
+		.hero {
+			display: grid;
+			grid-template-columns: 1.08fr 0.92fr;
+			gap: 28px;
+			align-items: center;
+			margin-bottom: 48px;
+		}
+
+		.hero-tagline {
+			font-size: 1.05rem;
+			color: var(--text);
+			margin: 0 0 20px;
+			max-width: 54ch;
+		}
+
+		.badge-row {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-bottom: 24px;
+			padding: 0;
+			list-style: none;
+		}
+
+		.badge {
+			font-family: var(--font-display);
+			font-size: 0.62rem;
+			line-height: 1.3;
+			padding: 7px 10px;
+			background-color: var(--panel);
+			border: 1px solid var(--border);
+			box-shadow: inset 0 0 0 1px var(--shadow-inner);
+			color: var(--yellow);
+			letter-spacing: 0.04em;
+		}
+
+		.badge:nth-child(2) {
+			color: var(--red);
+		}
+
+		.badge:nth-child(3) {
+			color: var(--blue);
+		}
+
+		.badge:nth-child(4) {
+			color: var(--green);
+		}
+
+		.cta-row {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 14px;
+		}
+
+		.btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			text-decoration: none;
+			cursor: pointer;
+			padding: 13px 22px;
+			border: 2px solid var(--border);
+			font-family: var(--font-display);
+			font-size: 0.78rem;
+			line-height: 1.2;
+			letter-spacing: 0.05em;
+			transition: transform 0.1s ease, filter 0.15s ease, border-color 0.15s ease;
+		}
+
+		.btn-primary {
+			background-color: var(--orange);
+			color: #000000;
+			border-color: #FFFFFF;
+			box-shadow: inset 0 -3px 0 #B86F1B, 0 4px 14px rgba(242, 160, 61, 0.35);
+		}
+
+		.btn-primary:hover,
+		.btn-primary:focus-visible {
+			color: #000000;
+			filter: brightness(1.08);
+			transform: translateY(-1px);
+		}
+
+		.btn-secondary {
+			background-color: var(--panel);
+			color: var(--text);
+			border-color: var(--border);
+			box-shadow: inset 0 0 0 2px var(--shadow-inner);
+			font-family: var(--font-mono);
+			font-weight: 700;
+			font-size: 0.92rem;
+			padding: 11px 18px;
+		}
+
+		.btn-secondary:hover,
+		.btn-secondary:focus-visible {
+			color: var(--blue);
+			border-color: var(--blue);
+		}
+
+		.pixel-shot {
+			display: block;
+			width: 100%;
+			height: auto;
+			aspect-ratio: 8 / 5;
+			background-color: #000000;
+			border: 1px solid var(--shadow-inner);
+			image-rendering: pixelated;
+			image-rendering: crisp-edges;
+		}
+
+		.hero-figure {
+			margin: 0;
+		}
+
+		/* 2. #play Game Embed */
+		.play-wrapper {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.iframe-frame {
+			width: 100%;
+			max-width: 984px;
+			padding: 12px;
+		}
+
+		.game-iframe {
+			display: block;
+			width: 100%;
+			max-width: 960px;
+			aspect-ratio: 8 / 5;
+			height: auto;
+			border: 1px solid var(--shadow-inner);
+			background-color: #000000;
+			margin: 0 auto;
+		}
+
+		.play-meta {
+			width: 100%;
+			max-width: 984px;
+			margin-top: 12px;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 12px 16px;
+			background-color: var(--panel);
+			border: 1px solid var(--shadow-inner);
+			font-size: 0.9rem;
+		}
+
+		.play-note {
+			margin: 0;
+			color: var(--text);
+		}
+
+		.play-note strong {
+			color: var(--orange);
+		}
+
+		.new-tab-link {
+			font-weight: 700;
+			white-space: nowrap;
+			color: var(--blue);
+			text-decoration: none;
+			border-bottom: 1px dashed var(--blue);
+		}
+
+		.new-tab-link:hover,
+		.new-tab-link:focus-visible {
+			color: #FFFFFF;
+			border-bottom-color: #FFFFFF;
+		}
+
+		/* Tables */
+		.table-scroll {
+			width: 100%;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 0.93rem;
+		}
+
+		th, td {
+			text-align: left;
+			padding: 10px 14px;
+			border-bottom: 1px solid var(--shadow-inner);
+			vertical-align: top;
+		}
+
+		th {
+			font-family: var(--font-display);
+			font-size: 0.68rem;
+			color: var(--orange);
+			background-color: var(--panel-alt);
+			border-bottom: 2px solid var(--border);
+			letter-spacing: 0.05em;
+			white-space: nowrap;
+		}
+
+		tbody tr:hover {
+			background-color: rgba(111, 195, 247, 0.05);
+		}
+
+		tbody tr:last-child td {
+			border-bottom: none;
+		}
+
+		kbd {
+			display: inline-block;
+			padding: 2px 7px;
+			font-family: var(--font-mono);
+			font-size: 0.86rem;
+			font-weight: 700;
+			color: var(--yellow);
+			background-color: #000000;
+			border: 1px solid var(--border);
+			box-shadow: inset 0 -1px 0 var(--shadow-inner);
+			white-space: nowrap;
+		}
+
+		.num-col {
+			text-align: right;
+			font-variant-numeric: tabular-nums;
+			white-space: nowrap;
+			color: var(--yellow);
+			font-weight: 700;
+		}
+
+		.stage-num {
+			font-family: var(--font-display);
+			font-size: 0.72rem;
+			color: var(--blue);
+			white-space: nowrap;
+		}
+
+		.boss-name {
+			color: var(--red);
+			font-weight: 700;
+			white-space: nowrap;
+		}
+
+		/* 4. Arsenal cards */
+		.arsenal-grid {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 16px;
+		}
+
+		.arsenal-card {
+			padding: 18px 18px 16px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.card-head {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.colour-chip {
+			width: 14px;
+			height: 14px;
+			border: 1px solid #FFFFFF;
+			box-shadow: 0 0 0 1px #000000;
+			flex-shrink: 0;
+		}
+
+		.arsenal-card h3 {
+			margin: 0;
+			font-size: 0.78rem;
+			text-shadow: none;
+			color: #FFFFFF;
+		}
+
+		.arsenal-card p {
+			margin: 0;
+			color: var(--text-muted);
+			font-size: 0.9rem;
+		}
+
+		/* Callout banner */
+		.callout {
+			margin-top: 16px;
+			padding: 12px 16px;
+			background-color: var(--panel-alt);
+			border-left: 4px solid var(--orange);
+			border-top: 1px solid var(--shadow-inner);
+			border-right: 1px solid var(--shadow-inner);
+			border-bottom: 1px solid var(--shadow-inner);
+			color: var(--text);
+			font-size: 0.92rem;
+		}
+
+		.callout strong {
+			color: var(--orange);
+		}
+
+		/* 6. Gallery */
+		.gallery-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 20px;
+		}
+
+		.gallery-item {
+			margin: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+
+		.gallery-item figcaption {
+			font-size: 0.88rem;
+			color: var(--text-muted);
+			padding: 2px 4px 0;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.gallery-item figcaption::before {
+			content: "▸";
+			color: var(--orange);
+		}
+
+		/* 7. Scoring & survival */
+		.scoring-layout {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 20px;
+			align-items: start;
+		}
+
+		.rules-list {
+			margin: 0;
+			padding-left: 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			color: var(--text);
+		}
+
+		.rules-list li::marker {
+			color: var(--orange);
+		}
+
+		.rules-list strong {
+			color: var(--yellow);
+		}
+
+		/* 8. Pilot tips */
+		.tips-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 16px;
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.tip-card {
+			padding: 16px 18px;
+			background-color: var(--panel);
+			border: 2px solid var(--border);
+			box-shadow: inset 0 0 0 2px var(--shadow-inner);
+		}
+
+		.tip-title {
+			display: block;
+			font-family: var(--font-display);
+			font-size: 0.72rem;
+			color: var(--blue);
+			margin-bottom: 8px;
+			text-shadow: none;
+		}
+
+		.tip-card p {
+			margin: 0;
+			font-size: 0.9rem;
+			color: var(--text-muted);
+		}
+
+		/* 9. About & credits */
+		.about-grid {
+			display: grid;
+			grid-template-columns: 1.3fr 0.7fr;
+			gap: 24px;
+		}
+
+		.about-prose p {
+			margin: 0 0 12px;
+			color: var(--text-muted);
+		}
+
+		.about-prose p:last-child {
+			margin-bottom: 0;
+		}
+
+		.about-prose strong {
+			color: var(--text);
+		}
+
+		.about-links {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			font-size: 0.92rem;
+		}
+
+		.about-links li {
+			padding-bottom: 10px;
+			border-bottom: 1px solid var(--shadow-inner);
+		}
+
+		.about-links li:last-child {
+			padding-bottom: 0;
+			border-bottom: none;
+		}
+
+		.about-links code {
+			color: var(--green);
+			background-color: #000000;
+			padding: 1px 5px;
+			border: 1px solid var(--shadow-inner);
+		}
+
+		/* Footer */
+		.site-footer {
+			margin-top: 48px;
+			padding-top: 22px;
+			border-top: 2px solid var(--shadow-inner);
+			text-align: center;
+			font-family: var(--font-display);
+			font-size: 0.7rem;
+			line-height: 1.7;
+			color: var(--text-dim);
+		}
+
+		/* Responsive single-column layout on mobile/tablet */
+		@media (max-width: 920px) {
+			.arsenal-grid {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
+		}
+
+		@media (max-width: 768px) {
+			.page-shell {
+				padding: 0 14px 48px;
+			}
+
+			.hero,
+			.arsenal-grid,
+			.gallery-grid,
+			.scoring-layout,
+			.tips-grid,
+			.about-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.metal-panel {
+				padding: 18px 16px;
+			}
+
+			.iframe-frame {
+				padding: 8px;
+			}
+
+			.play-meta {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+		}
+	</style>
+</head>
+<body>
+	<a class="skip-link" href="#play">Skip to game</a>
+
+	<div class="page-shell">
+		<nav class="top-nav" aria-label="Section navigation">
+			<a class="top-nav-brand" href="#top">RIFT VECTOR</a>
+			<ul class="top-nav-links">
+				<li><a href="#play">Play</a></li>
+				<li><a href="#controls">Controls</a></li>
+				<li><a href="#arsenal">Arsenal</a></li>
+				<li><a href="#campaign">Campaign</a></li>
+				<li><a href="#gallery">Gallery</a></li>
+				<li><a href="#scoring">Scoring</a></li>
+				<li><a href="#tips">Tips</a></li>
+				<li><a href="#about">About</a></li>
+			</ul>
+		</nav>
+
+		<!-- 1. Header / Hero -->
+		<header id="top" class="hero">
+			<div class="hero-copy">
+				<h1>RIFT VECTOR</h1>
+				<p class="hero-tagline">An original homage to the 1987 classic that defined the strategic shmup</p>
+				<ul class="badge-row" aria-label="Key features">
+					<li class="badge">10 STAGES</li>
+					<li class="badge">10 BOSSES</li>
+					<li class="badge">LINUX + WEB</li>
+					<li class="badge">SCORE ATTACK</li>
+				</ul>
+				<div class="cta-row">
+					<a href="#play" class="btn btn-primary" id="hero-play-btn">PLAY</a>
+					<a href="https://github.com/yasn77/rift-vector" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+				</div>
+			</div>
+			<figure class="hero-figure metal-frame">
+				<img
+					class="pixel-shot"
+					src="img/title.png"
+					alt="Rift Vector title screen showing the Lance starfighter over a black starfield and riveted biomechanical hull bands"
+					width="960"
+					height="600"
+				>
+			</figure>
+		</header>
+
+		<main>
+			<!-- 2. #play -->
+			<section id="play" aria-labelledby="heading-play">
+				<h2 id="heading-play">LAUNCH BAY</h2>
+				<div class="play-wrapper">
+					<div class="metal-frame iframe-frame">
+						<iframe
+							id="game-iframe"
+							class="game-iframe"
+							src="game.html"
+							title="Rift Vector web game"
+							width="960"
+							height="600"
+							allow="fullscreen; autoplay"
+							allowfullscreen
+						></iframe>
+					</div>
+					<div class="play-meta">
+						<p class="play-note"><strong>PILOT BRIEF:</strong> Click inside the game, then press <kbd>ENTER</kbd> to launch. Audio unlocks on your first key press. Fullscreen recommended.</p>
+						<a class="new-tab-link" href="game.html" target="_blank" rel="noopener">Open game in a new tab ↗</a>
+					</div>
+				</div>
+			</section>
+
+			<!-- 3. Controls -->
+			<section id="controls" aria-labelledby="heading-controls">
+				<h2 id="heading-controls">CONTROLS</h2>
+				<div class="metal-panel">
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr>
+									<th scope="col">Input</th>
+									<th scope="col">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><kbd>Arrows</kbd> / <kbd>WASD</kbd></td>
+									<td>Move your starfighter</td>
+								</tr>
+								<tr>
+									<td><kbd>Z</kbd> or <kbd>Space</kbd> (tap)</td>
+									<td>Fire rapid vulcan burst</td>
+								</tr>
+								<tr>
+									<td><kbd>Z</kbd> or <kbd>Space</kbd> (hold ≥0.3 s, then release)</td>
+									<td>Charge &amp; fire Wave Cannon — tiers at <strong>0.6 / 1.1 / 1.8 s</strong>; watch the <strong>BEAM</strong> gauge</td>
+								</tr>
+								<tr>
+									<td><kbd>X</kbd> or <kbd>Left Shift</kbd></td>
+									<td>Launch / recall the Force pod</td>
+								</tr>
+								<tr>
+									<td><kbd>Enter</kbd></td>
+									<td>Start / continue / next stage</td>
+								</tr>
+								<tr>
+									<td><kbd>P</kbd></td>
+									<td>Pause</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</section>
+
+			<!-- 4. Arsenal -->
+			<section id="arsenal" aria-labelledby="heading-arsenal">
+				<h2 id="heading-arsenal">ARSENAL</h2>
+				<div class="arsenal-grid">
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #F2F2F2;" aria-hidden="true"></span>
+							<h3>VULCAN</h3>
+						</div>
+						<p>1 dmg rapid-fire nose cannon. Reliable baseline suppression when your Wave Cannon is uncharged.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #6FC3F7;" aria-hidden="true"></span>
+							<h3>WAVE CANNON</h3>
+						</div>
+						<p>8 / 20 / 48 dmg across three charge tiers. Pierces formations cleanly; you cannot fire vulcan while charging.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #F2A03D;" aria-hidden="true"></span>
+							<h3>FORCE POD</h3>
+						</div>
+						<p>Indestructible. Attach front or rear by contact to shield your hull and fire your laser backwards; launch it as a 4-dmg ram; detached, it mirrors your height and fires L1 forward / L2 V / L3 K patterns. 3 levels via crystals.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #E04838;" aria-hidden="true"></span>
+							<h3>RED CRYSTAL</h3>
+						</div>
+						<p>Twin forward counter-oscillating lasers that weave into a concentrated helix beam at max level.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #6FC3F7;" aria-hidden="true"></span>
+							<h3>BLUE CRYSTAL</h3>
+						</div>
+						<p>3 simultaneous beams (forward and ±45° diagonals) that reflect off solid terrain up to twice.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #E8D040;" aria-hidden="true"></span>
+							<h3>YELLOW CRYSTAL</h3>
+						</div>
+						<p>Up/down vertical flame plumes that lock onto ceiling and floor surfaces and crawl along terrain.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #8A9099;" aria-hidden="true"></span>
+							<h3>BITS</h3>
+						</div>
+						<p>Up to 2 orbiting satellite pods (≤2) that block incoming bullets and fire extra forward shots with the red laser.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #E04838;" aria-hidden="true"></span>
+							<h3>MISSILES</h3>
+						</div>
+						<p>Twin homing ordnance (2×3 dmg) that seeks armoured ground turrets and airborne threats independently.</p>
+					</article>
+
+					<article class="metal-panel arsenal-card">
+						<div class="card-head">
+							<span class="colour-chip" style="background-color: #3FA34D;" aria-hidden="true"></span>
+							<h3>SPEED</h3>
+						</div>
+						<p>Thruster upgrades capped at level 3, scaling ship velocity cleanly along 80 + 16 × level px/s.</p>
+					</article>
+				</div>
+			</section>
+
+			<!-- 5. The Campaign -->
+			<section id="campaign" aria-labelledby="heading-campaign">
+				<h2 id="heading-campaign">THE CAMPAIGN</h2>
+				<div class="metal-panel">
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr>
+									<th scope="col">Stage</th>
+									<th scope="col">Sector Name</th>
+									<th scope="col">Boss</th>
+									<th scope="col">Combat Gimmick</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td class="stage-num">01</td>
+									<td>Breach Wake</td>
+									<td class="boss-name">Ribmaw</td>
+									<td>Tail sweep, chest core laser</td>
+								</tr>
+								<tr>
+									<td class="stage-num">02</td>
+									<td>Living Throat</td>
+									<td class="boss-name">Oculocyst</td>
+									<td>Worm chains, periodic eye</td>
+								</tr>
+								<tr>
+									<td class="stage-num">03</td>
+									<td>Vesper Broadside</td>
+									<td class="boss-name">Iron Vesper</td>
+									<td>Whole-stage battleship, destructible turrets, rear engine bay — attach Force rearward</td>
+								</tr>
+								<tr>
+									<td class="stage-num">04</td>
+									<td>Broken Compiler</td>
+									<td class="boss-name">Trifold Compiler</td>
+									<td>Splits into 3 orbiting lobes</td>
+								</tr>
+								<tr>
+									<td class="stage-num">05</td>
+									<td>Bell Nursery</td>
+									<td class="boss-name">Bellmite Matron</td>
+									<td>Shed six shell cells to expose the core</td>
+								</tr>
+								<tr>
+									<td class="stage-num">06</td>
+									<td>Transit Artery</td>
+									<td class="boss-name">Transit Piston</td>
+									<td>Telegraphed lane lunges</td>
+								</tr>
+								<tr>
+									<td class="stage-num">07</td>
+									<td>Mirror Brood</td>
+									<td class="boss-name">Dop Regent</td>
+									<td>Commands 3-HP dop clones, front crown core</td>
+								</tr>
+								<tr>
+									<td class="stage-num">08</td>
+									<td>Falling Cathedral</td>
+									<td class="boss-name">Hatch Warden</td>
+									<td>Ceiling debris, brief furnace exposure</td>
+								</tr>
+								<tr>
+									<td class="stage-num">09</td>
+									<td>Citadel Heart</td>
+									<td class="boss-name">Citadel Heart</td>
+									<td>Rotating guard fan, iris core</td>
+								</tr>
+								<tr>
+									<td class="stage-num">10</td>
+									<td>Rift Sovereign</td>
+									<td class="boss-name">Vorn Overmind</td>
+									<td>Two phases: heart volleys above 150 HP, crown opens at ≤150</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="callout"><strong>BOSS ENGAGEMENT RULE:</strong> Every boss telegraphs its attack for <strong>≥0.6 s</strong>, and only its exposed weak point takes damage.</p>
+				</div>
+			</section>
+
+			<!-- 6. Gallery -->
+			<section id="gallery" aria-labelledby="heading-gallery">
+				<h2 id="heading-gallery">RECON GALLERY</h2>
+				<div class="gallery-grid">
+					<figure class="metal-frame gallery-item">
+						<img
+							class="pixel-shot"
+							src="img/gameplay.png"
+							alt="Stage 1 Breach Wake gameplay showing the Lance firing at red enemy formations between riveted grey terrain bands"
+							width="960"
+							height="600"
+							loading="lazy"
+						>
+						<figcaption>Stage 1 — Breach Wake</figcaption>
+					</figure>
+
+					<figure class="metal-frame gallery-item">
+						<img
+							class="pixel-shot"
+							src="img/boss-ribmaw.png"
+							alt="Stage 1 boss Ribmaw towering on the right side of the screen with its glowing chest core exposed"
+							width="960"
+							height="600"
+							loading="lazy"
+						>
+						<figcaption>Ribmaw, chest core exposed</figcaption>
+					</figure>
+
+					<figure class="metal-frame gallery-item">
+						<img
+							class="pixel-shot"
+							src="img/boss-oculocyst.png"
+							alt="Stage 2 boss Oculocyst guarded by organic terrain and segmented worm chains in the Living Throat"
+							width="960"
+							height="600"
+							loading="lazy"
+						>
+						<figcaption>Oculocyst in the Living Throat</figcaption>
+					</figure>
+
+					<figure class="metal-frame gallery-item">
+						<img
+							class="pixel-shot"
+							src="img/boss-overmind.png"
+							alt="Stage 10 final boss The Vorn Overmind inside flesh-pink biomechanical caverns with its upper brain crown open"
+							width="960"
+							height="600"
+							loading="lazy"
+						>
+						<figcaption>The Vorn Overmind, final phase</figcaption>
+					</figure>
+				</div>
+			</section>
+
+			<!-- 7. Scoring & survival -->
+			<section id="scoring" aria-labelledby="heading-scoring">
+				<h2 id="heading-scoring">SCORING &amp; SURVIVAL</h2>
+				<div class="scoring-layout">
+					<div class="metal-panel">
+						<h3>BOUNTY TABLE</h3>
+						<div class="table-scroll">
+							<table>
+								<thead>
+									<tr>
+										<th scope="col">Target / Bonus</th>
+										<th scope="col" style="text-align: right;">Points</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Mine</td>
+										<td class="num-col">50</td>
+									</tr>
+									<tr>
+										<td>Drone</td>
+										<td class="num-col">100</td>
+									</tr>
+									<tr>
+										<td>Worm segment</td>
+										<td class="num-col">150</td>
+									</tr>
+									<tr>
+										<td>Fighter / Crawler</td>
+										<td class="num-col">200</td>
+									</tr>
+									<tr>
+										<td>Dop</td>
+										<td class="num-col">250</td>
+									</tr>
+									<tr>
+										<td>Turret</td>
+										<td class="num-col">300</td>
+									</tr>
+									<tr>
+										<td>Carrier</td>
+										<td class="num-col">500</td>
+									</tr>
+									<tr>
+										<td>Boss clear</td>
+										<td class="num-col">5000 + 1000 × stage</td>
+									</tr>
+									<tr>
+										<td>No-miss stage clear</td>
+										<td class="num-col">10000</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="metal-panel">
+						<h3>SURVIVAL RULES</h3>
+						<ul class="rules-list">
+							<li><strong>Persistent Hi-Score:</strong> Your highest score is saved automatically in your browser between sessions.</li>
+							<li><strong>Three Lives &amp; Checkpoints:</strong> Every run begins with <strong>3 lives</strong>, with a mid-stage checkpoint at <strong>60%</strong> of each stage's scroll.</li>
+							<li><strong>Recovery After Death:</strong> Respawning keeps your <strong>Force pod at level 1</strong> so you are never defenceless, but strips active crystals, bits, missiles, and speed-ups.</li>
+							<li><strong>Unlimited Continues:</strong> Continuing resets your current run score to zero, never your recorded hi-score.</li>
+							<li><strong>Supply Cadence:</strong> Carrier drones enter every <strong>12 s</strong> and guarantee a power-up drop when destroyed.</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
+			<!-- 8. Pilot tips -->
+			<section id="tips" aria-labelledby="heading-tips">
+				<h2 id="heading-tips">PILOT TIPS</h2>
+				<ul class="tips-grid">
+					<li class="tip-card">
+						<span class="tip-title">01 // SHIELD WITH THE FORCE</span>
+						<p>Dock the Force on your nose to absorb enemy bullets cleanly, or launch it forward into armoured targets as an indestructible 4-dmg battering ram.</p>
+					</li>
+					<li class="tip-card">
+						<span class="tip-title">02 // REAR-ATTACH FOR THE BATTLESHIP</span>
+						<p>On Stage 3 (Vesper Broadside), fly ahead of the Iron Vesper and dock the Force on your tail so your lasers fire straight backwards into its rear engine bay.</p>
+					</li>
+					<li class="tip-card">
+						<span class="tip-title">03 // FULL CHARGE DELETES FORMATIONS</span>
+						<p>Pre-charge a 1.8 s Wave Cannon before heavy waves arrive — a single 48-dmg beam pierces entire columns before they can return fire.</p>
+					</li>
+					<li class="tip-card">
+						<span class="tip-title">04 // BLUE LASER OWNS CORRIDORS</span>
+						<p>Blue crystal beams split at ±45° and ricochet twice off ceilings and floors, saturating tight biomechanical passages around blind corners.</p>
+					</li>
+					<li class="tip-card">
+						<span class="tip-title">05 // YELLOW CLEARS GROUND LANES</span>
+						<p>Yellow plumes climb vertical walls and hug ceilings and floors, sweeping entrenched turrets and crawlers without exposing your hull.</p>
+					</li>
+					<li class="tip-card">
+						<span class="tip-title">06 // LEARN THE PATTERNS</span>
+						<p>Rift Vector is deliberate, not twitch. Read the ≥0.6 s telegraphs, claim safe lanes early, and position your Force before weak points open.</p>
+					</li>
+				</ul>
+			</section>
+
+			<!-- 9. About & credits -->
+			<section id="about" aria-labelledby="heading-about">
+				<h2 id="heading-about">ABOUT &amp; CREDITS</h2>
+				<div class="metal-panel about-grid">
+					<div class="about-prose">
+						<p><strong>Rift Vector</strong> is an original IP inspired by <strong>R-Type</strong> (Irem, 1987) — no Irem artwork, audio, names, or code are used.</p>
+						<p>Built with <strong>Defold 1.14.1</strong> through a deterministic asset and verification pipeline: <strong>48 palette-locked sprite clips</strong>, <strong>22 mastered FM/PSG audio cues</strong>, a <strong>50-check blind behavioural test suite</strong>, and a native Linux build shipping <strong>Vulkan + OpenGL shader parity</strong>.</p>
+						<p>Released under the <strong>MIT licence</strong>.</p>
+					</div>
+					<ul class="about-links">
+						<li><a href="https://github.com/yasn77/rift-vector" target="_blank" rel="noopener noreferrer">GitHub Repository (yasn77/rift-vector)</a></li>
+						<li>Linux x86_64 build: <a href="https://github.com/yasn77/rift-vector/tree/main/dist/linux" target="_blank" rel="noopener noreferrer">binary in the repo under <code>dist/linux</code></a></li>
+						<li>Engine: <a href="https://defold.com" target="_blank" rel="noopener noreferrer">Defold 1.14.1</a></li>
+						<li>Historical reference: <a href="https://en.wikipedia.org/wiki/R-Type" target="_blank" rel="noopener noreferrer">R-Type (1987) on Wikipedia</a></li>
+					</ul>
+				</div>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			Rift Vector — fly deliberate, charge deep, shield smart.
+		</footer>
+	</div>
+
+	<script>
+		(function () {
+			var playBtn = document.getElementById("hero-play-btn");
+			var gameFrame = document.getElementById("game-iframe");
+			if (playBtn && gameFrame) {
+				playBtn.addEventListener("click", function () {
+					window.setTimeout(function () {
+						try {
+							gameFrame.focus({ preventScroll: true });
+						} catch (_) {
+							gameFrame.focus();
+						}
+					}, 350);
+				});
+			}
+
+			var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+			if (!reduceMotion) {
+				var ticking = false;
+				window.addEventListener("scroll", function () {
+					if (!ticking) {
+						window.requestAnimationFrame(function () {
+							var y = window.scrollY || 0;
+							document.documentElement.style.setProperty("--star-y-near", (-y * 0.12).toFixed(1) + "px");
+							document.documentElement.style.setProperty("--star-y-far", (-y * 0.05).toFixed(1) + "px");
+							ticking = false;
+						});
+						ticking = true;
+					}
+				}, { passive: true });
+			}
+		})();
+	</script>
+</body>
+</html>

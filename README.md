@@ -7,6 +7,12 @@ music and code in this repository are original; R-Type is the inspiration, not t
 
 Built with **Defold 1.14.1** for **Linux x86_64** (OpenGL + Vulkan) and the **web** (WebGL).
 
+## Play online
+
+Play directly in your browser at **<https://yasn77.github.io/rift-vector/>**.
+
+The GitHub Pages site is assembled automatically by [`.github/workflows/pages.yml`](.github/workflows/pages.yml) from `dist/web/` and `web/`.
+
 ## Play
 
 ### Linux
