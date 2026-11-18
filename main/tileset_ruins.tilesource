@@ -1,0 +1,5 @@
+image: "/assets/sprites/tileset_ruins/tileset_ruins_strip_00.png"
+tile_width: 16
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0

@@ -1,0 +1,745 @@
+-- main/controller.script -- Gameplay controller (/game#controller) for Rift Vector.
+-- Owns the 22-message contract, shared keyboard/bot command routing, hi-score
+-- sys.save persistence, audio mixer coordination, and sprite/tilemap/HUD view sync.
+-- Strict Lua 5.1, British English (Oxford spelling).
+
+local defold_notice = require "license.defold_notice"
+local C = require "main.constants"
+local stages = require "main.stages"
+local sim_mod = require "main.sim"
+local mixer_mod = require "main.mixer"
+
+go.property("ts_metal", resource.tile_source("/main/tileset_metal.tilesource"))
+go.property("ts_flesh", resource.tile_source("/main/tileset_flesh.tilesource"))
+go.property("ts_ruins", resource.tile_source("/main/tileset_ruins.tilesource"))
+go.property("ts_core", resource.tile_source("/main/tileset_core.tilesource"))
+
+local MSG_HUD_SYNC = hash("hud_sync")
+local MSG_ENABLE = hash("enable")
+local MSG_DISABLE = hash("disable")
+
+local EVENT_NAME_TO_HASH = {
+  input_move = C.MSG_INPUT_MOVE,
+  input_fire_press = C.MSG_INPUT_FIRE_PRESS,
+  input_fire_release = C.MSG_INPUT_FIRE_RELEASE,
+  input_force = C.MSG_INPUT_FORCE,
+  input_start = C.MSG_INPUT_START,
+  input_pause = C.MSG_INPUT_PAUSE,
+  player_hit = C.MSG_PLAYER_HIT,
+  enemy_killed = C.MSG_ENEMY_KILLED,
+  score_add = C.MSG_SCORE_ADD,
+  powerup_collected = C.MSG_POWERUP_COLLECTED,
+  stage_clear = C.MSG_STAGE_CLEAR,
+  boss_defeated = C.MSG_BOSS_DEFEATED,
+  game_over = C.MSG_GAME_OVER,
+  wave_charge = C.MSG_WAVE_CHARGE,
+  force_state = C.MSG_FORCE_STATE,
+  checkpoint_reached = C.MSG_CHECKPOINT_REACHED,
+  audio_request = C.MSG_AUDIO_REQUEST,
+  screen_changed = C.MSG_SCREEN_CHANGED,
+  test_mode = C.MSG_TEST_MODE,
+  test_advance = C.MSG_TEST_ADVANCE,
+  test_spawn_report = C.MSG_TEST_SPAWN_REPORT,
+  test_set_stage = C.MSG_TEST_SET_STAGE,
+}
+
+---------------------------------------------------------------------------
+-- Save-file persistence (rift-vector / hi_score)
+---------------------------------------------------------------------------
+
+local function load_disk_hi_score()
+  local ok_path, path = pcall(sys.get_save_file, "rift-vector", "hi_score")
+  if not ok_path or type(path) ~= "string" then
+    return 0
+  end
+  local ok_load, data = pcall(sys.load, path)
+  if not ok_load or type(data) ~= "table" then
+    return 0
+  end
+  local val = data.hi_score
+  if type(val) ~= "number" or val ~= val or val >= math.huge or val < 0 then
+    return 0
+  end
+  return math.floor(val)
+end
+
+local function save_disk_hi_score(score_val)
+  if type(score_val) ~= "number" or score_val ~= score_val or score_val >= math.huge or score_val < 0 then
+    return false
+  end
+  local clean = math.floor(score_val)
+  -- Never clobber a higher valid disk value if one exists
+  local existing = load_disk_hi_score()
+  if existing > clean then
+    return false
+  end
+  local ok_path, path = pcall(sys.get_save_file, "rift-vector", "hi_score")
+  if not ok_path or type(path) ~= "string" then
+    return false
+  end
+  local ok_save = pcall(sys.save, path, { hi_score = clean })
+  return ok_save == true
+end
+
+---------------------------------------------------------------------------
+-- Listener registry (release-safe URL comparison without tostring(hash))
+---------------------------------------------------------------------------
+
+local function same_url(a, b)
+  return a ~= nil and b ~= nil
+    and a.socket == b.socket
+    and a.path == b.path
+    and a.fragment == b.fragment
+end
+
+local function register_listener(self, sender)
+  if sender == nil then
+    return
+  end
+  if same_url(sender, self.self_url) or same_url(sender, self.hud_url) then
+    return
+  end
+  for i = 1, #self.listeners do
+    if same_url(self.listeners[i], sender) then
+      return
+    end
+  end
+  self.listeners[#self.listeners + 1] = msg.url(sender.socket, sender.path, sender.fragment)
+end
+
+local function broadcast_event(self, ev_hash, payload)
+  msg.post(self.hud_url, ev_hash, payload)
+  for i = 1, #self.listeners do
+    msg.post(self.listeners[i], ev_hash, payload)
+  end
+end
+
+---------------------------------------------------------------------------
+-- Sprite / Tilemap view helpers
+---------------------------------------------------------------------------
+
+local function spawn_actor(anim_name, x, y, z, hflip, scale_vec)
+  local pos = vmath.vector3(math.floor(x + 0.5), math.floor(y + 0.5), z)
+  local id = factory.create("#actor_factory", pos, nil, nil, scale_vec or vmath.vector3(1.0, 1.0, 1.0))
+  if id == nil then
+    return nil
+  end
+  local spr = msg.url(nil, id, "sprite")
+  sprite.play_flipbook(spr, hash(anim_name))
+  sprite.set_hflip(spr, hflip == true)
+  return {
+    id = id,
+    spr = spr,
+    anim = anim_name,
+    hflip = (hflip == true),
+    enabled = true,
+  }
+end
+
+local function set_actor_visible(actor, visible)
+  if actor == nil or actor.enabled == visible then
+    return
+  end
+  actor.enabled = visible
+  msg.post(actor.spr, visible and MSG_ENABLE or MSG_DISABLE)
+end
+
+local function update_actor(actor, anim_name, x, y, z, hflip, scale_y, rot_rad)
+  if actor.anim ~= anim_name then
+    actor.anim = anim_name
+    sprite.play_flipbook(actor.spr, hash(anim_name))
+  end
+  local want_flip = (hflip == true)
+  if actor.hflip ~= want_flip then
+    actor.hflip = want_flip
+    sprite.set_hflip(actor.spr, want_flip)
+  end
+  go.set_position(vmath.vector3(math.floor(x + 0.5), math.floor(y + 0.5), z), actor.id)
+  if scale_y ~= nil then
+    go.set_scale(vmath.vector3(1.0, scale_y, 1.0), actor.id)
+  end
+  if rot_rad ~= nil then
+    go.set_rotation(vmath.quat_rotation_z(rot_rad), actor.id)
+  end
+end
+
+local function acquire_actor(self, anim_name, x, y, z, hflip, scale_vec)
+  local sc = scale_vec or vmath.vector3(1.0, 1.0, 1.0)
+  local pool = self.actor_pool
+  if #pool > 0 then
+    local actor = pool[#pool]
+    pool[#pool] = nil
+    set_actor_visible(actor, true)
+    go.set_scale(sc, actor.id)
+    go.set_rotation(vmath.quat_rotation_z(0.0), actor.id)
+    update_actor(actor, anim_name, x, y, z, hflip == true, nil, nil)
+    return actor
+  end
+  return spawn_actor(anim_name, x, y, z, hflip, sc)
+end
+
+local function release_actor(self, actor)
+  if actor == nil or actor.id == nil then
+    return
+  end
+  set_actor_visible(actor, false)
+  self.actor_pool[#self.actor_pool + 1] = actor
+end
+
+local function sync_actor_map(self, map, list, key_field, z, default_flip, build_fn)
+  local seen = {}
+  for i = 1, #list do
+    local item = list[i]
+    local key = item[key_field]
+    seen[key] = true
+    local anim, hflip, scale_y, rot_rad = build_fn(item)
+    local actor = map[key]
+    if actor == nil then
+      local sc = scale_y and vmath.vector3(1.0, scale_y, 1.0) or nil
+      actor = acquire_actor(self, anim, item.x, item.y, z, hflip ~= nil and hflip or default_flip, sc)
+      if actor and actor.id and rot_rad ~= nil then
+        go.set_rotation(vmath.quat_rotation_z(rot_rad), actor.id)
+      end
+      map[key] = actor
+    elseif actor.id ~= nil then
+      update_actor(actor, anim, item.x, item.y, z, hflip ~= nil and hflip or default_flip, scale_y, rot_rad)
+    end
+  end
+  for key, actor in pairs(map) do
+    if not seen[key] then
+      release_actor(self, actor)
+      map[key] = nil
+    end
+  end
+end
+
+local function rebuild_stage_tilemap(self, stage_num)
+  if self.built_tilemap_stage == stage_num then
+    return
+  end
+  self.built_tilemap_stage = stage_num
+  local st = stages.get_stage(stage_num)
+  local ts_prop = self["ts_" .. st.tileset] or self.ts_metal
+  pcall(go.set, self.tilemap_url, "tile_source", ts_prop)
+
+  for row = 1, stages.TILE_ROWS do
+    for col = 1, stages.TILE_COLS do
+      local t = stages.tile_at(stage_num, col, row)
+      tilemap.set_tile(self.tilemap_url, "ground", col, row, t)
+    end
+  end
+end
+
+local function sync_view(self)
+  local sim = self.sim
+  local on_title = (sim.screen == "title")
+
+  -- 1. Parallax 18-star field
+  for i = 1, #sim.stars do
+    local s = sim.stars[i]
+    local z = -0.65 + s.layer * 0.05
+    local star_actor = self.view.stars[i]
+    if star_actor == nil then
+      star_actor = spawn_actor("star_spark_glint", s.x, s.y, z, false, nil)
+      self.view.stars[i] = star_actor
+    else
+      go.set_position(vmath.vector3(math.floor(s.x + 0.5), s.y, z), star_actor.id)
+    end
+  end
+
+  -- 2. Stage terrain tilemap
+  rebuild_stage_tilemap(self, sim.stage)
+  go.set_position(vmath.vector3(-math.floor(sim.scroll_px + 0.5), 24.0, -0.30), "terrain")
+
+  -- 3. Stage 3 repeated battleship hull sections along deck approach
+  local hull_items = {}
+  if sim.stage == 3 and not on_title and not sim.boss_locked then
+    for idx = 1, 5 do
+      local world_hx = 520.0 + (idx - 1) * 280.0
+      local screen_hx = world_hx - sim.scroll_px
+      if screen_hx >= -80.0 and screen_hx <= 400.0 then
+        hull_items[#hull_items + 1] = {
+          key = "hull-" .. tostring(idx),
+          x = screen_hx,
+          y = 112.0,
+        }
+      end
+    end
+  end
+  sync_actor_map(self, self.view.stage_hulls, hull_items, "key", -0.38, true, function()
+    return "boss_03_iron_vesper_attack", true, nil, nil
+  end)
+
+  -- 4. RV-7 Lance (with 10 Hz respawn invulnerability blink)
+  local show_ship = (not on_title) and sim.ship.alive
+  if show_ship and sim.invuln_timer > 0.0 then
+    if (math.floor(sim.invuln_timer * 20.0) % 2) == 1 then
+      show_ship = false
+    end
+  end
+  set_actor_visible(self.view.ship, show_ship)
+  if show_ship then
+    update_actor(self.view.ship, "ship_fly", sim.ship.x, sim.ship.y, 0.20, false, nil, nil)
+  end
+
+  -- 5. Force pod & Bits
+  local show_force = (not on_title) and sim.force.acquired and sim.force.level >= 1
+  set_actor_visible(self.view.force, show_force)
+  if show_force then
+    local fanim = "force_lv" .. tostring(math.min(3, sim.force.level)) .. "_pulse"
+    local fflip = (sim.force.state == "attached_rear")
+    update_actor(self.view.force, fanim, sim.force.x, sim.force.y, 0.22, fflip, nil, nil)
+  end
+
+  for b_idx = 1, 2 do
+    local show_bit = (not on_title) and sim.ship.alive and (sim.bits >= b_idx)
+    local bit_actor = self.view.bits[b_idx]
+    set_actor_visible(bit_actor, show_bit)
+    if show_bit then
+      local bp = sim.bit_positions[b_idx]
+      update_actor(bit_actor, "bit_orbit", bp.x, bp.y, 0.21, false, nil, nil)
+    end
+  end
+
+  -- 6. Ordinary enemies, pickups, projectiles, explosions
+  sync_actor_map(self, self.view.enemies, on_title and {} or sim.enemies, "spawn_id", -0.10, true, function(e)
+    return e.anim, true, nil, nil
+  end)
+
+  sync_actor_map(self, self.view.pickups, on_title and {} or sim.pickups, "spawn_id", -0.15, false, function(p)
+    return p.anim, false, nil, nil
+  end)
+
+  sync_actor_map(self, self.view.player_shots, on_title and {} or sim.player_shots, "id", 0.10, false, function(s)
+    local rot = (s.kind == "missile" or s.kind == "laser_blue") and s.heading or 0.0
+    return s.anim, s.hflip, s.scale_y or 1.0, rot
+  end)
+
+  sync_actor_map(self, self.view.enemy_bullets, on_title and {} or sim.enemy_bullets, "id", 0.12, true, function(b)
+    return b.anim, true, nil, nil
+  end)
+
+  sync_actor_map(self, self.view.explosions, on_title and {} or sim.explosions, "id", 0.35, false, function(fx)
+    return fx.big and "explosion_big_burst" or "explosion_small_burst", false, nil, nil
+  end)
+
+  -- 7. Boss, exposed core & boss parts
+  local boss = (not on_title) and sim.boss or nil
+  if boss ~= nil and boss.hp > 0 then
+    if self.view.boss == nil then
+      self.view.boss = spawn_actor(boss.anim, boss.x, boss.y, -0.10, true, nil)
+    else
+      set_actor_visible(self.view.boss, true)
+      update_actor(self.view.boss, boss.anim, boss.x, boss.y, -0.10, true, nil, nil)
+    end
+
+    local show_core = (boss.exposed == true)
+    if self.view.boss_core == nil then
+      self.view.boss_core = spawn_actor("boss_core_pulse", boss.core_x, boss.core_y, -0.08, true, nil)
+    end
+    set_actor_visible(self.view.boss_core, show_core)
+    if show_core then
+      local cscale = sim_mod.tween_eval(boss.core_scale_tw)
+      update_actor(self.view.boss_core, "boss_core_pulse", boss.core_x, boss.core_y, -0.08, true, nil, nil)
+      go.set_scale(vmath.vector3(cscale, cscale, 1.0), self.view.boss_core.id)
+    end
+
+    local live_parts = {}
+    for i = 1, #boss.parts do
+      if boss.parts[i].hp > 0 then
+        live_parts[#live_parts + 1] = boss.parts[i]
+      end
+    end
+    local orbit_rad = (sim_mod.tween_eval(boss.orbit_tw) * math.pi) / 180.0
+    sync_actor_map(self, self.view.boss_parts, live_parts, "id", -0.09, true, function(p)
+      local sc = (p.kind == "lobe") and 0.5 or 1.0
+      local rot = (p.kind == "lobe") and orbit_rad or 0.0
+      return p.anim, true, sc, rot
+    end)
+  else
+    set_actor_visible(self.view.boss, false)
+    set_actor_visible(self.view.boss_core, false)
+    sync_actor_map(self, self.view.boss_parts, {}, "id", -0.09, true, function(p)
+      return p.anim, true, 1.0, 0.0
+    end)
+  end
+end
+
+---------------------------------------------------------------------------
+-- Flush simulation events, audio cues, hi-score & HUD state
+---------------------------------------------------------------------------
+
+local function flush_sim(self)
+  local sim = self.sim
+  if sim.stop_charge_audio then
+    sim.stop_charge_audio = false
+    mixer_mod.stop_charge(self.mixer)
+  end
+
+  if sim.hi_score_dirty then
+    sim.hi_score_dirty = false
+    save_disk_hi_score(sim.hi_score)
+  end
+
+  local events = sim_mod.drain_events(sim)
+  for i = 1, #events do
+    local ev = events[i]
+    local ev_hash = EVENT_NAME_TO_HASH[ev.name]
+    if ev.name == "audio_request" then
+      local cue_id = ev.payload and ev.payload.cue_id
+      if cue_id then
+        self.audio_clock = self.audio_clock + 0.0001
+        mixer_mod.play(self.mixer, cue_id, self.audio_clock)
+      end
+    elseif ev.name == "screen_changed" then
+      local scr = ev.payload and ev.payload.screen
+      mixer_mod.set_paused(self.mixer, scr == "pause")
+    end
+    if ev_hash ~= nil then
+      broadcast_event(self, ev_hash, ev.payload)
+    end
+  end
+
+  if sim.score ~= self.hud_cache.score
+    or sim.hi_score ~= self.hud_cache.hi_score
+    or sim.lives ~= self.hud_cache.lives
+    or sim.stage ~= self.hud_cache.stage
+    or sim.screen ~= self.hud_cache.screen
+  then
+    self.hud_cache.score = sim.score
+    self.hud_cache.hi_score = sim.hi_score
+    self.hud_cache.lives = sim.lives
+    self.hud_cache.stage = sim.stage
+    self.hud_cache.screen = sim.screen
+    msg.post(self.hud_url, MSG_HUD_SYNC, {
+      score = sim.score,
+      hi_score = sim.hi_score,
+      lives = sim.lives,
+      stage = sim.stage,
+      screen = sim.screen,
+      test_mode = sim.test_mode,
+    })
+  end
+end
+
+---------------------------------------------------------------------------
+-- Shared command router (identical path for keyboard and bot messages)
+---------------------------------------------------------------------------
+
+local function lock_held_keys_until_release(self)
+  self.require_release.up = self.kb.up
+  self.require_release.down = self.kb.down
+  self.require_release.left = self.kb.left
+  self.require_release.right = self.kb.right
+  self.require_release.fire = self.kb.fire
+  self.require_release.force = self.kb.force
+  self.require_release.start = self.kb.start
+end
+
+local function handle_command(self, message_id, message)
+  local sim = self.sim
+  if message_id == C.MSG_INPUT_MOVE then
+    sim_mod.input_move(sim, message and message.dx or 0, message and message.dy or 0)
+  elseif message_id == C.MSG_INPUT_FIRE_PRESS then
+    sim_mod.input_fire_press(sim)
+  elseif message_id == C.MSG_INPUT_FIRE_RELEASE then
+    sim_mod.input_fire_release(sim)
+  elseif message_id == C.MSG_INPUT_FORCE then
+    sim_mod.input_force(sim)
+  elseif message_id == C.MSG_INPUT_START then
+    if self.bot_enabled then
+      mixer_mod.unlock_native_only(self.mixer, self.audio_clock)
+    end
+    sim_mod.input_start(sim)
+  elseif message_id == C.MSG_INPUT_PAUSE then
+    local res = sim_mod.input_pause(sim)
+    if res == "paused" or res == "resumed" then
+      lock_held_keys_until_release(self)
+    end
+  end
+  flush_sim(self)
+end
+
+---------------------------------------------------------------------------
+-- Defold lifecycle callbacks
+---------------------------------------------------------------------------
+
+function init(self)
+  self.notice = defold_notice.NOTICE
+  self.self_url = msg.url()
+  self.hud_url = msg.url("hud#gui")
+  self.tilemap_url = msg.url("terrain#tilemap")
+  self.listeners = {}
+  self.bot_enabled = (sys.get_config_string("rift.bot") == "1")
+  if self.bot_enabled then
+    local ok_b, exists_b = pcall(go.exists, "bot")
+    if ok_b and exists_b then
+      self.listeners[#self.listeners + 1] = msg.url("bot#bot")
+    end
+  end
+
+  self.audio_clock = 0.0
+  self.rms_frames = 0
+  self.mixer = mixer_mod.new()
+
+  if html5 ~= nil and html5.set_interaction_listener ~= nil then
+    pcall(html5.set_interaction_listener, function(inst)
+      mixer_mod.unlock_real_gesture(inst.mixer, inst.audio_clock)
+    end)
+  end
+
+  local initial_hi = load_disk_hi_score()
+  self.sim = sim_mod.new(initial_hi)
+  self.hud_cache = { score = -1, hi_score = -1, lives = -1, stage = -1, screen = "" }
+  self.built_tilemap_stage = -1
+
+  self.kb = {
+    up = false, down = false, left = false, right = false,
+    fire = false, force = false, start = false, pause = false,
+  }
+  self.require_release = {
+    up = false, down = false, left = false, right = false,
+    fire = false, force = false, start = false,
+  }
+
+  self.actor_pool = {}
+  self.view = {
+    stars = {},
+    stage_hulls = {},
+    ship = spawn_actor("ship_fly", sim_mod.SHIP_START_X, sim_mod.SHIP_START_Y, 0.20, false, nil),
+    force = spawn_actor("force_lv1_pulse", sim_mod.SHIP_START_X + 24.0, sim_mod.SHIP_START_Y, 0.22, false, nil),
+    bits = {
+      spawn_actor("bit_orbit", sim_mod.SHIP_START_X, sim_mod.SHIP_START_Y + 20.0, 0.21, false, nil),
+      spawn_actor("bit_orbit", sim_mod.SHIP_START_X, sim_mod.SHIP_START_Y - 20.0, 0.21, false, nil),
+    },
+    enemies = {},
+    pickups = {},
+    player_shots = {},
+    enemy_bullets = {},
+    explosions = {},
+    boss = nil,
+    boss_core = nil,
+    boss_parts = {},
+  }
+
+  msg.post(".", "acquire_input_focus")
+
+  sim_mod.reset_to_title(self.sim, initial_hi)
+  flush_sim(self)
+  sync_view(self)
+end
+
+function update(self, dt)
+  mixer_mod.end_batch(self.mixer)
+  if self.sim.test_mode then
+    return
+  end
+  self.audio_clock = self.audio_clock + sim_mod.DT
+  sim_mod.step_tick(self.sim)
+  flush_sim(self)
+  sync_view(self)
+
+  self.rms_frames = self.rms_frames + 1
+  if self.rms_frames >= 60 then
+    self.rms_frames = 0
+    mixer_mod.sample_rms(self.mixer, self.audio_clock)
+  end
+end
+
+local function update_kb_move(self)
+  local rx = (self.kb.right and not self.require_release.right) and 1 or 0
+  local lx = (self.kb.left and not self.require_release.left) and 1 or 0
+  local uy = (self.kb.up and not self.require_release.up) and 1 or 0
+  local dy = (self.kb.down and not self.require_release.down) and 1 or 0
+  handle_command(self, C.MSG_INPUT_MOVE, { dx = rx - lx, dy = uy - dy })
+end
+
+function on_input(self, action_id, action)
+  if action_id == nil then
+    return false
+  end
+  if action.pressed then
+    mixer_mod.unlock_real_gesture(self.mixer, self.audio_clock)
+  end
+
+  if action_id == C.ACTION_MOVE_UP then
+    if action.pressed then self.kb.up = true end
+    if action.released then self.kb.up = false; self.require_release.up = false end
+    update_kb_move(self)
+    return true
+  elseif action_id == C.ACTION_MOVE_DOWN then
+    if action.pressed then self.kb.down = true end
+    if action.released then self.kb.down = false; self.require_release.down = false end
+    update_kb_move(self)
+    return true
+  elseif action_id == C.ACTION_MOVE_LEFT then
+    if action.pressed then self.kb.left = true end
+    if action.released then self.kb.left = false; self.require_release.left = false end
+    update_kb_move(self)
+    return true
+  elseif action_id == C.ACTION_MOVE_RIGHT then
+    if action.pressed then self.kb.right = true end
+    if action.released then self.kb.right = false; self.require_release.right = false end
+    update_kb_move(self)
+    return true
+  elseif action_id == C.ACTION_FIRE then
+    if action.released then
+      local was_active = self.kb.fire and not self.require_release.fire
+      self.kb.fire = false
+      self.require_release.fire = false
+      if was_active then
+        handle_command(self, C.MSG_INPUT_FIRE_RELEASE, {})
+      end
+    elseif action.pressed and not action.repeated then
+      if not self.kb.fire and not self.require_release.fire then
+        self.kb.fire = true
+        handle_command(self, C.MSG_INPUT_FIRE_PRESS, {})
+      end
+    end
+    return true
+  elseif action_id == C.ACTION_FORCE then
+    if action.released then
+      self.kb.force = false
+      self.require_release.force = false
+    elseif action.pressed and not action.repeated then
+      if not self.kb.force and not self.require_release.force then
+        self.kb.force = true
+        handle_command(self, C.MSG_INPUT_FORCE, {})
+      end
+    end
+    return true
+  elseif action_id == C.ACTION_START then
+    if action.released then
+      self.kb.start = false
+      self.require_release.start = false
+    elseif action.pressed and not action.repeated then
+      if not self.kb.start and not self.require_release.start then
+        self.kb.start = true
+        handle_command(self, C.MSG_INPUT_START, {})
+      end
+    end
+    return true
+  elseif action_id == C.ACTION_PAUSE then
+    if action.released then
+      self.kb.pause = false
+    elseif action.pressed and not action.repeated and not self.kb.pause then
+      self.kb.pause = true
+      handle_command(self, C.MSG_INPUT_PAUSE, {})
+    end
+    return true
+  end
+  return false
+end
+
+function on_message(self, message_id, message, sender)
+  register_listener(self, sender)
+
+  if message_id == C.MSG_INPUT_MOVE
+    or message_id == C.MSG_INPUT_FIRE_PRESS
+    or message_id == C.MSG_INPUT_FIRE_RELEASE
+    or message_id == C.MSG_INPUT_FORCE
+    or message_id == C.MSG_INPUT_START
+    or message_id == C.MSG_INPUT_PAUSE
+  then
+    handle_command(self, message_id, message)
+    if not self.sim.test_mode then
+      sync_view(self)
+    end
+    return
+  end
+
+  if message_id == C.MSG_TEST_MODE then
+    local enabled = (message ~= nil and message.enabled == true)
+    self.sim.test_mode = enabled
+    mixer_mod.set_test_mode(self.mixer, enabled)
+    if enabled then
+      pcall(sys.set_update_frequency, 300)
+      local disk_hi = load_disk_hi_score()
+      sim_mod.reset_to_title(self.sim, disk_hi)
+      flush_sim(self)
+    end
+    return
+  end
+
+  if message_id == C.MSG_TEST_SET_STAGE then
+    sim_mod.test_set_stage(self.sim, message and message.stage or 1)
+    flush_sim(self)
+    if not self.sim.test_mode then
+      sync_view(self)
+    end
+    return
+  end
+
+  if message_id == C.MSG_TEST_ADVANCE then
+    local ticks = (message and tonumber(message.ticks)) or 0
+    if self.sim.test_mode and ticks > 0 then
+      local n = math.floor(ticks)
+      for _ = 1, n do
+        self.audio_clock = self.audio_clock + sim_mod.DT
+        sim_mod.step_tick(self.sim)
+        flush_sim(self)
+      end
+    else
+      flush_sim(self)
+    end
+    if not self.sim.test_mode then
+      sync_view(self)
+    end
+    local report = sim_mod.build_spawn_report(self.sim)
+    if sender ~= nil then
+      msg.post(sender, C.MSG_TEST_SPAWN_REPORT, report)
+    end
+    return
+  end
+
+  if message_id == C.MSG_PLAYER_HIT then
+    sim_mod.trigger_player_hit(self.sim, message and message.source_id or "external")
+    flush_sim(self)
+    return
+  end
+
+  if message_id == C.MSG_ENEMY_KILLED then
+    if message and message.kind then
+      sim_mod.award_enemy_kill(self.sim, message.spawn_id, message.kind, message.stage, false)
+      flush_sim(self)
+    end
+    return
+  end
+
+  if message_id == C.MSG_POWERUP_COLLECTED then
+    if message and message.kind then
+      sim_mod.collect_powerup(self.sim, message.kind, message.spawn_id)
+      flush_sim(self)
+    end
+    return
+  end
+
+  if message_id == C.MSG_BOSS_DEFEATED then
+    sim_mod.defeat_boss(self.sim, message and message.stage or self.sim.stage)
+    flush_sim(self)
+    return
+  end
+
+  if message_id == C.MSG_AUDIO_REQUEST then
+    local cue = message and message.cue_id
+    if cue and mixer_mod.is_known_cue(cue) then
+      self.audio_clock = self.audio_clock + 0.0001
+      mixer_mod.play(self.mixer, cue, self.audio_clock)
+      broadcast_event(self, C.MSG_AUDIO_REQUEST, { cue_id = cue })
+    end
+    return
+  end
+
+  if message_id == C.MSG_SCORE_ADD then
+    if same_url(sender, self.self_url) and message and type(message.amount) == "number" then
+      -- Internal controller-only award
+      flush_sim(self)
+    end
+    return
+  end
+end
+
+function final(self)
+  mixer_mod.stop_charge(self.mixer)
+  mixer_mod.stop_all_bgm(self.mixer)
+end

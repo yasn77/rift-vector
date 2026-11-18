@@ -1,0 +1,599 @@
+animations {
+  id: "ship_fly"
+  images {
+    image: "/assets/sprites/ship/ship_fly_00.png"
+  }
+  images {
+    image: "/assets/sprites/ship/ship_fly_01.png"
+  }
+  images {
+    image: "/assets/sprites/ship/ship_fly_02.png"
+  }
+  images {
+    image: "/assets/sprites/ship/ship_fly_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "force_lv1_pulse"
+  images {
+    image: "/assets/sprites/force_lv1/force_lv1_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/force_lv1/force_lv1_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "force_lv2_pulse"
+  images {
+    image: "/assets/sprites/force_lv2/force_lv2_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/force_lv2/force_lv2_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "force_lv3_pulse"
+  images {
+    image: "/assets/sprites/force_lv3/force_lv3_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/force_lv3/force_lv3_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "bit_orbit"
+  images {
+    image: "/assets/sprites/bit/bit_orbit_00.png"
+  }
+  images {
+    image: "/assets/sprites/bit/bit_orbit_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player_shot_fly"
+  images {
+    image: "/assets/sprites/player_shot/player_shot_fly_00.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "wave_beam_surge"
+  images {
+    image: "/assets/sprites/wave_beam/wave_beam_surge_00.png"
+  }
+  images {
+    image: "/assets/sprites/wave_beam/wave_beam_surge_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "laser_red_surge"
+  images {
+    image: "/assets/sprites/laser_red/laser_red_surge_00.png"
+  }
+  images {
+    image: "/assets/sprites/laser_red/laser_red_surge_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "laser_blue_surge"
+  images {
+    image: "/assets/sprites/laser_blue/laser_blue_surge_00.png"
+  }
+  images {
+    image: "/assets/sprites/laser_blue/laser_blue_surge_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "laser_yellow_surge"
+  images {
+    image: "/assets/sprites/laser_yellow/laser_yellow_surge_00.png"
+  }
+  images {
+    image: "/assets/sprites/laser_yellow/laser_yellow_surge_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "missile_fly"
+  images {
+    image: "/assets/sprites/missile/missile_fly_00.png"
+  }
+  images {
+    image: "/assets/sprites/missile/missile_fly_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy_shot_fly"
+  images {
+    image: "/assets/sprites/enemy_shot/enemy_shot_fly_00.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "enemy_orb_pulse"
+  images {
+    image: "/assets/sprites/enemy_orb/enemy_orb_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/enemy_orb/enemy_orb_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "drone_fly"
+  images {
+    image: "/assets/sprites/drone/drone_fly_00.png"
+  }
+  images {
+    image: "/assets/sprites/drone/drone_fly_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "carrier_hop"
+  images {
+    image: "/assets/sprites/carrier/carrier_hop_00.png"
+  }
+  images {
+    image: "/assets/sprites/carrier/carrier_hop_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "fighter_fly"
+  images {
+    image: "/assets/sprites/fighter/fighter_fly_00.png"
+  }
+  images {
+    image: "/assets/sprites/fighter/fighter_fly_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "worm_segment_writhe"
+  images {
+    image: "/assets/sprites/worm_segment/worm_segment_writhe_00.png"
+  }
+  images {
+    image: "/assets/sprites/worm_segment/worm_segment_writhe_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "turret_aim"
+  images {
+    image: "/assets/sprites/turret/turret_aim_00.png"
+  }
+  images {
+    image: "/assets/sprites/turret/turret_aim_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "crawler_crawl"
+  images {
+    image: "/assets/sprites/crawler/crawler_crawl_00.png"
+  }
+  images {
+    image: "/assets/sprites/crawler/crawler_crawl_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "mine_arm"
+  images {
+    image: "/assets/sprites/mine/mine_arm_00.png"
+  }
+  images {
+    image: "/assets/sprites/mine/mine_arm_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "dop_guard"
+  images {
+    image: "/assets/sprites/dop/dop_guard_00.png"
+  }
+  images {
+    image: "/assets/sprites/dop/dop_guard_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "crystal_red_pulse"
+  images {
+    image: "/assets/sprites/crystal_red/crystal_red_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/crystal_red/crystal_red_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "crystal_blue_pulse"
+  images {
+    image: "/assets/sprites/crystal_blue/crystal_blue_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/crystal_blue/crystal_blue_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "crystal_yellow_pulse"
+  images {
+    image: "/assets/sprites/crystal_yellow/crystal_yellow_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/crystal_yellow/crystal_yellow_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "pickup_bit_pulse"
+  images {
+    image: "/assets/sprites/pickup_bit/pickup_bit_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/pickup_bit/pickup_bit_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "pickup_speed_pulse"
+  images {
+    image: "/assets/sprites/pickup_speed/pickup_speed_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/pickup_speed/pickup_speed_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "pickup_missile_pulse"
+  images {
+    image: "/assets/sprites/pickup_missile/pickup_missile_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/pickup_missile/pickup_missile_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "explosion_small_burst"
+  images {
+    image: "/assets/sprites/explosion_small/explosion_small_burst_00.png"
+  }
+  images {
+    image: "/assets/sprites/explosion_small/explosion_small_burst_01.png"
+  }
+  images {
+    image: "/assets/sprites/explosion_small/explosion_small_burst_02.png"
+  }
+  images {
+    image: "/assets/sprites/explosion_small/explosion_small_burst_03.png"
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 16
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "explosion_big_burst"
+  images {
+    image: "/assets/sprites/explosion_big/explosion_big_burst_00.png"
+  }
+  images {
+    image: "/assets/sprites/explosion_big/explosion_big_burst_01.png"
+  }
+  images {
+    image: "/assets/sprites/explosion_big/explosion_big_burst_02.png"
+  }
+  images {
+    image: "/assets/sprites/explosion_big/explosion_big_burst_03.png"
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 16
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_01_ribmaw_attack"
+  images {
+    image: "/assets/sprites/boss_01_ribmaw/boss_01_ribmaw_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_01_ribmaw/boss_01_ribmaw_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_01_ribmaw/boss_01_ribmaw_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_01_ribmaw/boss_01_ribmaw_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_02_oculocyst_attack"
+  images {
+    image: "/assets/sprites/boss_02_oculocyst/boss_02_oculocyst_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_02_oculocyst/boss_02_oculocyst_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_02_oculocyst/boss_02_oculocyst_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_02_oculocyst/boss_02_oculocyst_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_03_iron_vesper_attack"
+  images {
+    image: "/assets/sprites/boss_03_iron_vesper/boss_03_iron_vesper_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_03_iron_vesper/boss_03_iron_vesper_attack_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_04_trifold_attack"
+  images {
+    image: "/assets/sprites/boss_04_trifold/boss_04_trifold_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_04_trifold/boss_04_trifold_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_04_trifold/boss_04_trifold_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_04_trifold/boss_04_trifold_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_05_bellmite_attack"
+  images {
+    image: "/assets/sprites/boss_05_bellmite/boss_05_bellmite_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_05_bellmite/boss_05_bellmite_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_05_bellmite/boss_05_bellmite_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_05_bellmite/boss_05_bellmite_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_06_piston_worm_attack"
+  images {
+    image: "/assets/sprites/boss_06_piston_worm/boss_06_piston_worm_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_06_piston_worm/boss_06_piston_worm_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_06_piston_worm/boss_06_piston_worm_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_06_piston_worm/boss_06_piston_worm_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_07_dop_regent_attack"
+  images {
+    image: "/assets/sprites/boss_07_dop_regent/boss_07_dop_regent_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_07_dop_regent/boss_07_dop_regent_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_07_dop_regent/boss_07_dop_regent_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_07_dop_regent/boss_07_dop_regent_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_08_hatch_warden_attack"
+  images {
+    image: "/assets/sprites/boss_08_hatch_warden/boss_08_hatch_warden_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_08_hatch_warden/boss_08_hatch_warden_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_08_hatch_warden/boss_08_hatch_warden_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_08_hatch_warden/boss_08_hatch_warden_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_09_guarded_core_attack"
+  images {
+    image: "/assets/sprites/boss_09_guarded_core/boss_09_guarded_core_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_09_guarded_core/boss_09_guarded_core_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_09_guarded_core/boss_09_guarded_core_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_09_guarded_core/boss_09_guarded_core_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_10_overmind_attack"
+  images {
+    image: "/assets/sprites/boss_10_overmind/boss_10_overmind_attack_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_10_overmind/boss_10_overmind_attack_01.png"
+  }
+  images {
+    image: "/assets/sprites/boss_10_overmind/boss_10_overmind_attack_02.png"
+  }
+  images {
+    image: "/assets/sprites/boss_10_overmind/boss_10_overmind_attack_03.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "boss_core_pulse"
+  images {
+    image: "/assets/sprites/boss_core/boss_core_pulse_00.png"
+  }
+  images {
+    image: "/assets/sprites/boss_core/boss_core_pulse_01.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "star_spark_glint"
+  images {
+    image: "/assets/sprites/star_spark/star_spark_glint_00.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

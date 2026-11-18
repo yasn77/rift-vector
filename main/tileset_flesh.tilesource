@@ -1,0 +1,5 @@
+image: "/assets/sprites/tileset_flesh/tileset_flesh_strip_00.png"
+tile_width: 16
+tile_height: 16
+tile_margin: 0
+tile_spacing: 0

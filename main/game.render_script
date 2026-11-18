@@ -1,0 +1,120 @@
+-- main/game.render_script -- 320x200 logical pixel-art projection with integer
+-- upscaling (960x600 = 3x) and black letterboxing. Strict Lua 5.1.
+
+local MSG_CLEAR_COLOR = hash("clear_color")
+local MSG_WINDOW_RESIZED = hash("window_resized")
+
+local LOGICAL_W = 320
+local LOGICAL_H = 200
+local GUI_W = 320
+local GUI_H = 200
+
+local function compute_viewport(win_w, win_h)
+  if win_w <= 0 or win_h <= 0 then
+    return 0, 0, 0, 0
+  end
+  local scale_x = win_w / LOGICAL_W
+  local scale_y = win_h / LOGICAL_H
+  local raw_scale = math.min(scale_x, scale_y)
+  local scale = raw_scale
+  if raw_scale >= 1.0 then
+    scale = math.floor(raw_scale)
+  end
+  local vp_w = math.max(1, math.floor(LOGICAL_W * scale + 0.5))
+  local vp_h = math.max(1, math.floor(LOGICAL_H * scale + 0.5))
+  local vp_x = math.floor((win_w - vp_w) * 0.5)
+  local vp_y = math.floor((win_h - vp_h) * 0.5)
+  return vp_x, vp_y, vp_w, vp_h
+end
+
+local function refresh_state(state)
+  local win_w = render.get_window_width()
+  local win_h = render.get_window_height()
+  if win_w <= 0 or win_h <= 0 then
+    state.valid = false
+    return false
+  end
+  state.valid = true
+  state.window_width = win_w
+  state.window_height = win_h
+  state.vp_x, state.vp_y, state.vp_w, state.vp_h = compute_viewport(win_w, win_h)
+  state.world_proj = vmath.matrix4_orthographic(0, LOGICAL_W, 0, LOGICAL_H, -10, 10)
+  state.gui_proj = vmath.matrix4_orthographic(0, GUI_W, 0, GUI_H, -10, 10)
+  state.world_opts.frustum = state.world_proj * state.identity_view
+  state.gui_opts.frustum = state.gui_proj * state.identity_view
+  return true
+end
+
+function init(self)
+  self.predicates = {
+    tile = render.predicate({ "tile" }),
+    particle = render.predicate({ "particle" }),
+    gui = render.predicate({ "gui" }),
+    debug_text = render.predicate({ "debug_text" }),
+  }
+  self.state = {
+    valid = false,
+    window_width = 0,
+    window_height = 0,
+    vp_x = 0,
+    vp_y = 0,
+    vp_w = 960,
+    vp_h = 600,
+    identity_view = vmath.matrix4(),
+    world_proj = vmath.matrix4(),
+    gui_proj = vmath.matrix4(),
+    world_opts = {},
+    gui_opts = {},
+    clear_buffers = {
+      [graphics.BUFFER_TYPE_COLOR0_BIT] = vmath.vector4(0, 0, 0, 1),
+      [graphics.BUFFER_TYPE_DEPTH_BIT] = 1,
+      [graphics.BUFFER_TYPE_STENCIL_BIT] = 0,
+    },
+  }
+  refresh_state(self.state)
+end
+
+function update(self)
+  local state = self.state
+  local win_w = render.get_window_width()
+  local win_h = render.get_window_height()
+  if (not state.valid) or win_w ~= state.window_width or win_h ~= state.window_height then
+    if not refresh_state(state) then
+      return
+    end
+  end
+
+  render.set_viewport(0, 0, state.window_width, state.window_height)
+  render.set_depth_mask(true)
+  render.set_stencil_mask(0xff)
+  render.clear(state.clear_buffers)
+
+  render.set_viewport(state.vp_x, state.vp_y, state.vp_w, state.vp_h)
+  render.set_view(state.identity_view)
+  render.set_projection(state.world_proj)
+
+  render.set_blend_func(graphics.BLEND_FACTOR_SRC_ALPHA, graphics.BLEND_FACTOR_ONE_MINUS_SRC_ALPHA)
+  render.enable_state(graphics.STATE_BLEND)
+  render.enable_state(graphics.STATE_DEPTH_TEST)
+  render.set_depth_mask(false)
+
+  render.draw(self.predicates.tile, state.world_opts)
+  render.draw(self.predicates.particle, state.world_opts)
+  render.disable_state(graphics.STATE_DEPTH_TEST)
+
+  render.set_view(state.identity_view)
+  render.set_projection(state.gui_proj)
+  render.enable_state(graphics.STATE_STENCIL_TEST)
+  render.draw(self.predicates.gui, state.gui_opts)
+  render.draw(self.predicates.debug_text, state.gui_opts)
+  render.disable_state(graphics.STATE_STENCIL_TEST)
+  render.disable_state(graphics.STATE_BLEND)
+end
+
+function on_message(self, message_id, message)
+  if message_id == MSG_CLEAR_COLOR and message and message.color then
+    self.state.clear_buffers[graphics.BUFFER_TYPE_COLOR0_BIT] = message.color
+  elseif message_id == MSG_WINDOW_RESIZED then
+    refresh_state(self.state)
+  end
+end

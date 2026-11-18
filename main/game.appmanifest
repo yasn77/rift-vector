@@ -1,0 +1,15 @@
+platforms:
+    x86_64-linux:
+        context:
+            symbols: [GraphicsAdapterOpenGL, GraphicsAdapterVulkan]
+            libs: [graphics, graphics_vulkan, platform, platform_vulkan]
+            dynamicLibs: [vulkan]
+    arm64-linux:
+        context:
+            symbols: [GraphicsAdapterOpenGLES, GraphicsAdapterVulkan]
+            libs: [graphics_opengles, graphics_vulkan, platform, platform_vulkan]
+            dynamicLibs: [vulkan]
+    js-web:
+        context: {}
+    wasm-web:
+        context: {}

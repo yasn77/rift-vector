@@ -1,0 +1,33 @@
+animations {
+  id: "hud_panel"
+  images {
+    image: "/assets/sprites/hud_panel/hud_panel_panel_00.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "beam_gauge"
+  images {
+    image: "/assets/sprites/beam_gauge/beam_gauge_bar_00.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "life_icon"
+  images {
+    image: "/assets/sprites/life_icon/life_icon_icon_00.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

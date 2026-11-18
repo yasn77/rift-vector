@@ -1,0 +1,143 @@
+-- main/hud.gui_script -- Bottom y=0..24 HUD band and six-screen overlay controller
+-- for Rift Vector. Strict Lua 5.1, GUI script context only (no go.* calls).
+
+local C = require "main.constants"
+
+local MSG_HUD_SYNC = hash("hud_sync")
+
+local COLOR_TIER_0 = vmath.vector4(0.435, 0.765, 0.969, 1.0)
+local COLOR_TIER_1 = vmath.vector4(0.243, 0.431, 0.878, 1.0)
+local COLOR_TIER_2 = vmath.vector4(0.910, 0.816, 0.251, 1.0)
+local COLOR_TIER_3 = vmath.vector4(0.949, 0.627, 0.239, 1.0)
+
+local function clamp_score(val)
+  local n = math.floor(tonumber(val) or 0)
+  if n < 0 then return 0 end
+  if n > 999999999 then return 999999999 end
+  return n
+end
+
+local function update_readouts(self)
+  gui.set_text(self.score_node, string.format("1P %09d", clamp_score(self.score)))
+  gui.set_text(self.hi_node, string.format("HI %09d", clamp_score(self.hi_score)))
+  gui.set_text(self.stage_node, string.format("STAGE %02d", math.max(1, math.min(10, self.stage))))
+
+  for i = 1, 3 do
+    gui.set_enabled(self.life_nodes[i], self.lives >= i)
+  end
+
+  local frac = math.max(0.0, math.min(1.0, tonumber(self.beam_fraction) or 0.0))
+  gui.set_size(self.beam_clip, vmath.vector3(math.floor(64.0 * frac + 0.5), 8.0, 0.0))
+  if self.beam_tier >= 3 then
+    gui.set_color(self.beam_fill, COLOR_TIER_3)
+  elseif self.beam_tier == 2 then
+    gui.set_color(self.beam_fill, COLOR_TIER_2)
+  elseif self.beam_tier == 1 then
+    gui.set_color(self.beam_fill, COLOR_TIER_1)
+  else
+    gui.set_color(self.beam_fill, COLOR_TIER_0)
+  end
+end
+
+local function apply_screen_overlay(self, screen, prev_screen)
+  self.screen = screen
+  gui.cancel_animations(self.fade_curtain, "color.w")
+  gui.cancel_animations(self.overlay_root, "color.w")
+
+  if screen == "play" then
+    gui.set_enabled(self.overlay_root, false)
+    if (not self.test_mode) and prev_screen ~= "pause" and prev_screen ~= "play" then
+      gui.set_color(self.fade_curtain, vmath.vector4(0.0, 0.0, 0.0, 0.65))
+      gui.animate(self.fade_curtain, "color.w", 0.0, gui.EASING_LINEAR, 0.25, 0.0, nil, gui.PLAYBACK_ONCE_FORWARD)
+    else
+      gui.set_color(self.fade_curtain, vmath.vector4(0.0, 0.0, 0.0, 0.0))
+    end
+    return
+  end
+
+  gui.set_enabled(self.overlay_root, true)
+  if screen == "title" then
+    gui.set_text(self.overlay_title, "RIFT VECTOR")
+    gui.set_text(self.overlay_sub, "RV-7 LANCE  -  PRESS ENTER")
+  elseif screen == "pause" then
+    gui.set_text(self.overlay_title, "PAUSED")
+    gui.set_text(self.overlay_sub, "PRESS P TO RESUME")
+  elseif screen == "stage_clear" then
+    gui.set_text(self.overlay_title, string.format("STAGE %02d CLEAR", self.stage))
+    gui.set_text(self.overlay_sub, "PRESS ENTER FOR NEXT STAGE")
+  elseif screen == "game_over" then
+    gui.set_text(self.overlay_title, "GAME OVER")
+    gui.set_text(self.overlay_sub, "PRESS ENTER TO CONTINUE")
+  elseif screen == "victory" then
+    gui.set_text(self.overlay_title, "VICTORY - OVERMIND DEFEATED")
+    gui.set_text(self.overlay_sub, string.format("FINAL %09d - PRESS ENTER", clamp_score(self.score)))
+  end
+
+  -- Pause itself is immediate; cinematic transitions fade GUI alpha over 0.25 s linear.
+  if screen == "pause" or self.test_mode then
+    gui.set_color(self.overlay_root, vmath.vector4(0.043, 0.055, 0.102, 0.92))
+    gui.set_color(self.fade_curtain, vmath.vector4(0.0, 0.0, 0.0, 0.0))
+  else
+    gui.set_color(self.overlay_root, vmath.vector4(0.043, 0.055, 0.102, 0.0))
+    gui.animate(self.overlay_root, "color.w", 0.92, gui.EASING_LINEAR, 0.25, 0.0, nil, gui.PLAYBACK_ONCE_FORWARD)
+  end
+end
+
+function init(self)
+  self.score_node = gui.get_node("score_1p")
+  self.hi_node = gui.get_node("hi_score")
+  self.stage_node = gui.get_node("stage_label")
+  self.life_nodes = {
+    gui.get_node("lives_1"),
+    gui.get_node("lives_2"),
+    gui.get_node("lives_3"),
+  }
+  self.beam_clip = gui.get_node("beam_gauge_clip")
+  self.beam_fill = gui.get_node("beam_gauge_fill")
+  self.overlay_root = gui.get_node("overlay_root")
+  self.overlay_title = gui.get_node("overlay_title")
+  self.overlay_sub = gui.get_node("overlay_sub")
+  self.fade_curtain = gui.get_node("fade_curtain")
+
+  self.score = 0
+  self.hi_score = 0
+  self.lives = 3
+  self.stage = 1
+  self.beam_tier = 0
+  self.beam_fraction = 0.0
+  self.screen = "title"
+
+  update_readouts(self)
+  apply_screen_overlay(self, "title", "title")
+end
+
+function on_message(self, message_id, message, sender)
+  if message_id == MSG_HUD_SYNC and message then
+    if message.test_mode ~= nil then self.test_mode = (message.test_mode == true) end
+    if message.score ~= nil then self.score = message.score end
+    if message.hi_score ~= nil then self.hi_score = message.hi_score end
+    if message.lives ~= nil then self.lives = message.lives end
+    if message.stage ~= nil then self.stage = message.stage end
+    update_readouts(self)
+    if message.screen ~= nil and message.screen ~= self.screen then
+      apply_screen_overlay(self, message.screen, self.screen)
+    elseif self.screen == "victory" then
+      gui.set_text(self.overlay_sub, string.format("FINAL %09d - PRESS ENTER", clamp_score(self.score)))
+    end
+  elseif message_id == C.MSG_WAVE_CHARGE and message then
+    self.beam_tier = message.tier or 0
+    self.beam_fraction = message.fraction or 0.0
+    update_readouts(self)
+  elseif message_id == C.MSG_SCREEN_CHANGED and message and message.screen then
+    if message.screen ~= self.screen then
+      apply_screen_overlay(self, message.screen, self.screen)
+    end
+  elseif message_id == C.MSG_STAGE_CLEAR and message and message.stage then
+    self.stage = message.stage
+    update_readouts(self)
+  elseif message_id == C.MSG_GAME_OVER and message then
+    if message.stage then self.stage = message.stage end
+    if message.score then self.score = message.score end
+    update_readouts(self)
+  end
+end
